@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
-export const useDashboardStore = create(() => ({
+export const useDashboardStore = create((set) => ({
+  setKpis: (kpis) => set({ kpis }),
   kpis: [
     { id: 'kpi-1', label: 'Monthly Revenue', value: 'INR 5.4L', delta: '+8.4%' },
     { id: 'kpi-2', label: 'Occupancy Rate', value: '94%', delta: '+3.1%' },

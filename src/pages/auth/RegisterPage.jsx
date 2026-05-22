@@ -1,8 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
+import { useUserStore } from '../../store/useUserStore'
+import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function RegisterPage() {
+  const navigate = useNavigate()
+  const { registerLandlord, isLoading, authError } = useUserStore()
+  const { pushToast } = useNotificationStore()
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -11,6 +17,26 @@ export function RegisterPage() {
     totalProperties: '',
     password: ''
   })
+
+  const handleRegister = async () => {
+    try {
+      await registerLandlord({
+        full_name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        property_type: form.propertyType,
+        property_count: Number(form.totalProperties) || 1
+      })
+      pushToast({ title: 'Account created', message: 'Landlord workspace is ready.' })
+      navigate('/dashboard')
+    } catch (error) {
+      pushToast({
+        title: 'Registration failed',
+        message: error.message || 'Could not create account.'
+      })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-ink-50 px-6 py-16">
@@ -45,7 +71,7 @@ export function RegisterPage() {
             }
           />
           <Input
-            placeholder="Primary property type"
+            placeholder="Primary property type (Flat, PG, House)"
             value={form.propertyType}
             onChange={(event) =>
               setForm((prev) => ({ ...prev, propertyType: event.target.value }))
@@ -67,7 +93,10 @@ export function RegisterPage() {
             }
           />
         </div>
-        <Button className="mt-6 w-full">Create landlord account</Button>
+        {authError && <p className="mt-4 text-xs text-rose-600">{authError}</p>}
+        <Button className="mt-6 w-full" onClick={handleRegister} disabled={isLoading}>
+          {isLoading ? 'Creating account...' : 'Create landlord account'}
+        </Button>
       </div>
     </div>
   )

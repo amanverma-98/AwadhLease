@@ -40,5 +40,11 @@ export const useChatStore = create((set) => ({
         activeId: newId
       }
     }),
-  setActive: (id) => set({ activeId: id })
+  setActive: (id) => set({ activeId: id }),
+  setConversationBackendId: (backendId) =>
+    set((state) => ({
+      conversations: state.conversations.map((conv) =>
+        conv.id === state.activeId ? { ...conv, backendId } : conv
+      )
+    }))
 }))

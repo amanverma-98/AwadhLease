@@ -7,8 +7,15 @@ import { useChatStore } from '../../store/useChatStore'
 import { sendChatMessage } from '../../services/chatService'
 
 export function AssistantPage() {
-  const { conversations, activeId, addMessage, prompts, typing, setTyping } =
-    useChatStore()
+  const {
+    conversations,
+    activeId,
+    addMessage,
+    prompts,
+    typing,
+    setTyping,
+    setConversationBackendId
+  } = useChatStore()
   const [message, setMessage] = useState('')
 
   const activeConversation = useMemo(
@@ -16,13 +23,19 @@ export function AssistantPage() {
     [conversations, activeId]
   )
 
+  const conversationId = activeConversation?.backendId || null
+
   const handleSend = async () => {
     if (!message.trim()) return
-    addMessage({ role: 'user', content: message })
+    const outgoing = message
+    addMessage({ role: 'user', content: outgoing })
     setMessage('')
     setTyping(true)
     try {
-      const result = await sendChatMessage(message)
+      const result = await sendChatMessage(outgoing, conversationId)
+      if (result.conversation_id) {
+        setConversationBackendId(result.conversation_id)
+      }
       addMessage({ role: 'assistant', content: result.response })
     } catch (error) {
       addMessage({

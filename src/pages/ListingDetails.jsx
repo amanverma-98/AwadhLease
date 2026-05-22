@@ -1,38 +1,94 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { MapPin, PhoneCall } from 'lucide-react'
-import { properties } from '../data/properties'
+import { properties as mockProperties } from '../data/properties'
+import { getProperty } from '../services/propertyService'
+import { createBooking } from '../services/bookingService'
+import { mapPropertyFromApi } from '../utils/propertyMapper'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
 import { formatRupee } from '../utils/format'
+import { useNotificationStore } from '../store/useNotificationStore'
 
 export function ListingDetails() {
   const { id } = useParams()
+  const { pushToast } = useNotificationStore()
   const [submitted, setSubmitted] = useState(false)
   const [contacted, setContacted] = useState(false)
-  const [form, setForm] = useState({ name: '', phone: '', date: '' })
+  const [loading, setLoading] = useState(true)
+  const [property, setProperty] = useState(null)
+  const [form, setForm] = useState({ name: '', phone: '', date: '', message: '' })
   const [activeImage, setActiveImage] = useState('')
 
   useEffect(() => {
     const saved = localStorage.getItem('rentpilot-visit')
     if (saved) {
-      setForm(JSON.parse(saved))
+      setForm((prev) => ({ ...prev, ...JSON.parse(saved) }))
     }
   }, [])
 
-  const property = useMemo(
-    () => properties.find((item) => item.id === id),
-    [id]
-  )
-
   useEffect(() => {
-    if (property?.gallery?.length) {
-      setActiveImage(property.gallery[0])
+    let active = true
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await getProperty(id)
+        if (!active) return
+        const mapped = mapPropertyFromApi(data)
+        setProperty(mapped)
+        setActiveImage(mapped.gallery[0])
+      } catch {
+        const fallback = mockProperties.find((item) => item.id === id)
+        if (active && fallback) {
+          setProperty(fallback)
+          setActiveImage(fallback.gallery[0])
+        }
+      } finally {
+        if (active) setLoading(false)
+      }
     }
-  }, [property])
+    load()
+    return () => {
+      active = false
+    }
+  }, [id])
+
+  const gallery = useMemo(() => property?.gallery || [], [property])
+
+  const handleBooking = async () => {
+    if (!form.name || !form.phone || !form.date) {
+      pushToast({ title: 'Missing details', message: 'Fill name, phone, and visit date.' })
+      return
+    }
+    try {
+      await createBooking({
+        property_id: id,
+        tenant_name: form.name,
+        tenant_phone: form.phone,
+        scheduled_at: new Date(form.date).toISOString(),
+        message: form.message || null
+      })
+      localStorage.setItem(
+        'rentpilot-visit',
+        JSON.stringify({ name: form.name, phone: form.phone, date: form.date })
+      )
+      setSubmitted(true)
+      pushToast({ title: 'Visit booked', message: 'Landlord will confirm shortly.' })
+    } catch (error) {
+      pushToast({ title: 'Booking failed', message: error.message })
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-16 text-sm text-ink-500">
+        Loading listing...
+      </div>
+    )
+  }
 
   if (!property) {
     return (
@@ -57,7 +113,7 @@ export function ListingDetails() {
               style={{ backgroundImage: `url(${activeImage})` }}
             />
             <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-              {property.gallery.map((image, index) => (
+              {gallery.map((image, index) => (
                 <button
                   key={`${property.id}-thumb-${index}`}
                   className={`h-20 rounded-2xl bg-cover bg-center transition ${
@@ -115,13 +171,6 @@ export function ListingDetails() {
               ))}
             </ul>
           </Card>
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-ink-900">Nearby places</h2>
-            <div className="mt-4 rounded-2xl border border-ink-100 bg-ink-50 p-5 text-sm text-ink-500">
-              Google Maps preview will render here. Nearby: Wave Mall, City
-              Hospital, Metro Station, 24x7 grocery.
-            </div>
-          </Card>
         </div>
         <div className="space-y-6">
           <Card className="p-6">
@@ -129,8 +178,7 @@ export function ListingDetails() {
               Book a site visit
             </h3>
             <p className="mt-2 text-sm text-ink-600">
-              AI will auto-fill your details next time and send a confirmation
-              instantly.
+              Your booking is sent to the backend and stored for the landlord.
             </p>
             <div className="mt-4 space-y-3">
               <Input
@@ -154,18 +202,20 @@ export function ListingDetails() {
                   setForm((prev) => ({ ...prev, date: event.target.value }))
                 }
               />
-              <Button
-                className="w-full"
-                onClick={() => {
-                  localStorage.setItem('rentpilot-visit', JSON.stringify(form))
-                  setSubmitted(true)
-                }}
-              >
+              <Textarea
+                placeholder="Message (optional)"
+                rows={2}
+                value={form.message}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, message: event.target.value }))
+                }
+              />
+              <Button className="w-full" onClick={handleBooking}>
                 Book site visit
               </Button>
               {submitted && (
                 <div className="rounded-2xl bg-emerald-500/10 p-4 text-sm text-emerald-700">
-                  Visit booked. Confirmation shared with landlord and tenant.
+                  Visit booked. Confirmation shared with landlord.
                 </div>
               )}
             </div>
@@ -185,7 +235,7 @@ export function ListingDetails() {
             </Button>
             {contacted && (
               <p className="mt-3 text-xs text-ink-500">
-                Landlord notified. Continue chat inside AwadhLease.
+                Landlord messaging API is not available yet — use site visit booking.
               </p>
             )}
           </Card>

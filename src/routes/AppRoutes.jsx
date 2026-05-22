@@ -23,6 +23,14 @@ import { TenantNotifications } from '../pages/tenant/TenantNotifications'
 import { NotFound } from '../pages/NotFound'
 import { useUserStore } from '../store/useUserStore'
 
+function AuthGuard({ children }) {
+  const { isAuthenticated } = useUserStore()
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />
+  }
+  return children
+}
+
 function RoleGuard({ role, children }) {
   const { role: currentRole } = useUserStore()
   if (currentRole && currentRole !== role) {
@@ -44,9 +52,11 @@ export function AppRoutes() {
 
       <Route
         element={
-          <RoleGuard role="landlord">
-            <DashboardLayout />
-          </RoleGuard>
+          <AuthGuard>
+            <RoleGuard role="landlord">
+              <DashboardLayout />
+            </RoleGuard>
+          </AuthGuard>
         }
       >
         <Route path="/dashboard" element={<LandlordDashboard />} />
@@ -60,9 +70,11 @@ export function AppRoutes() {
 
       <Route
         element={
-          <RoleGuard role="tenant">
-            <TenantLayout />
-          </RoleGuard>
+          <AuthGuard>
+            <RoleGuard role="tenant">
+              <TenantLayout />
+            </RoleGuard>
+          </AuthGuard>
         }
       >
         <Route path="/tenant/dashboard" element={<TenantDashboard />} />

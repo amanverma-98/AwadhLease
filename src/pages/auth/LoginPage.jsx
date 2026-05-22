@@ -3,16 +3,29 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { useUserStore } from '../../store/useUserStore'
+import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { login } = useUserStore()
+  const { loginWithCredentials, isLoading, authError } = useUserStore()
+  const { pushToast } = useNotificationStore()
   const [form, setForm] = useState({ email: '', password: '' })
-  const role = form.email.includes('tenant') ? 'tenant' : 'landlord'
 
-  const handleLogin = () => {
-    login({ name: role === 'tenant' ? 'Tenant User' : 'Landlord Admin', email: form.email, role })
-    navigate(role === 'tenant' ? '/tenant/dashboard' : '/dashboard')
+  const handleLogin = async () => {
+    if (!form.email || !form.password) {
+      pushToast({ title: 'Missing fields', message: 'Enter email and password.' })
+      return
+    }
+    try {
+      const role = await loginWithCredentials(form.email, form.password)
+      pushToast({ title: 'Welcome back', message: 'Signed in successfully.' })
+      navigate(role === 'tenant' ? '/tenant/dashboard' : '/dashboard')
+    } catch (error) {
+      pushToast({
+        title: 'Login failed',
+        message: error.message || 'Check your credentials and try again.'
+      })
+    }
   }
 
   return (
@@ -26,16 +39,10 @@ export function LoginPage() {
             AI-secured access for landlords and tenants.
           </h1>
           <p className="text-sm text-white/70">
-            We auto-detect your role and route you to the right command center.
+            Sign in with credentials from your landlord onboarding email.
           </p>
-          <div className="rounded-3xl border border-white/10 bg-white/10 p-5">
-            <p className="text-xs uppercase text-white/60">Role detection</p>
-            <p className="mt-2 text-sm font-semibold">
-              Detected role: {role === 'tenant' ? 'Tenant' : 'Landlord'}
-            </p>
-          </div>
         </div>
-          <div className="glass-panel rounded-3xl p-8 text-ink-900 shadow-card">
+        <div className="glass-panel rounded-3xl p-8 text-ink-900 shadow-card">
           <h2 className="text-xl font-semibold text-ink-900">Login</h2>
           <div className="mt-6 space-y-4">
             <Input
@@ -53,14 +60,23 @@ export function LoginPage() {
                 setForm((prev) => ({ ...prev, password: event.target.value }))
               }
             />
-            <Button className="w-full" onClick={handleLogin}>
-              Login
+            {authError && (
+              <p className="text-xs text-rose-600">{authError}</p>
+            )}
+            <Button className="w-full" onClick={handleLogin} disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Login'}
             </Button>
             <button
               className="text-xs font-semibold text-brand-600"
               onClick={() => navigate('/auth/forgot-password')}
             >
               Forgot password?
+            </button>
+            <button
+              className="block text-xs font-semibold text-brand-600"
+              onClick={() => navigate('/auth/register')}
+            >
+              Register as landlord
             </button>
           </div>
         </div>

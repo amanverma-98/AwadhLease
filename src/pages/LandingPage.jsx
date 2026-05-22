@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Sparkles, MapPin } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -16,7 +17,21 @@ const floatingCards = [
 
 export function LandingPage() {
   const navigate = useNavigate()
-  const { listings, filters, setFilters } = usePropertyStore()
+  const { listings, filters, setFilters, fetchListings, isLoading, loadError, useMockFallback } =
+    usePropertyStore()
+
+  useEffect(() => {
+    fetchListings(filters)
+  }, [
+    fetchListings,
+    filters.location,
+    filters.type,
+    filters.bhk,
+    filters.furnished,
+    filters.budget,
+    filters.sortBy,
+    filters.features
+  ])
   const filterChips = [
     { key: 'Parking', type: 'amenity', value: 'Parking' },
     { key: 'WiFi', type: 'amenity', value: 'WiFi' },
@@ -129,7 +144,7 @@ export function LandingPage() {
                   <MapPin className="h-4 w-4" />
                   Lucknow
                 </div>
-                <Button>Search</Button>
+                <Button onClick={() => fetchListings(filters)}>Search</Button>
               </div>
             </div>
           </motion.div>
@@ -265,15 +280,29 @@ export function LandingPage() {
             <h2 className="text-2xl font-semibold text-ink-900">
               Curated listings in Lucknow
             </h2>
+            {loadError && (
+              <p className="mt-1 text-xs text-amber-600">
+                API unavailable — showing cached listings.
+              </p>
+            )}
+            {useMockFallback && !loadError && (
+              <p className="mt-1 text-xs text-ink-400">
+                No live listings yet. Showing demo data.
+              </p>
+            )}
           </div>
           <Button variant="secondary" onClick={() => navigate('/properties')}>
             View all
           </Button>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredListings.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
+          {isLoading && (
+            <p className="text-sm text-ink-500 md:col-span-3">Loading listings...</p>
+          )}
+          {!isLoading &&
+            filteredListings.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
         </div>
       </section>
     </div>

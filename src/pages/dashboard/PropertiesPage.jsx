@@ -1,15 +1,73 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { properties } from '../../data/properties'
 import { Card } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Textarea } from '../../components/ui/textarea'
 import { formatRupee } from '../../utils/format'
+import { listProperties, createProperty } from '../../services/propertyService'
+import { mapPropertyFromApi, mapPropertyToCreatePayload } from '../../utils/propertyMapper'
+import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function PropertiesPage() {
+  const { pushToast } = useNotificationStore()
   const [open, setOpen] = useState(false)
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({
+    name: '',
+    address: '',
+    locality: '',
+    propertyType: 'Flat',
+    monthlyRent: '',
+    bhk: '',
+    furnished: 'true',
+    occupancyStatus: 'available',
+    amenities: '',
+    rules: '',
+    description: ''
+  })
+
+  const loadProperties = async () => {
+    setLoading(true)
+    try {
+      const data = await listProperties({ limit: 100 })
+      setProperties(data.map(mapPropertyFromApi))
+    } catch (error) {
+      pushToast({ title: 'Load failed', message: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadProperties()
+  }, [])
+
+  const handleCreate = async () => {
+    try {
+      await createProperty(mapPropertyToCreatePayload(form))
+      pushToast({ title: 'Property added', message: 'Listing saved to backend.' })
+      setOpen(false)
+      setForm({
+        name: '',
+        address: '',
+        locality: '',
+        propertyType: 'Flat',
+        monthlyRent: '',
+        bhk: '',
+        furnished: 'true',
+        occupancyStatus: 'available',
+        amenities: '',
+        rules: '',
+        description: ''
+      })
+      loadProperties()
+    } catch (error) {
+      pushToast({ title: 'Save failed', message: error.message })
+    }
+  }
 
   return (
     <div className="space-y-6 pb-20">
@@ -35,6 +93,8 @@ export function PropertiesPage() {
         </div>
       </div>
 
+      {loading && <p className="text-sm text-ink-500">Loading properties...</p>}
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {properties.map((property) => (
           <Card key={property.id} className="p-5">
@@ -57,11 +117,6 @@ export function PropertiesPage() {
               <div>Type: {property.type}</div>
               <div>Occupancy: {property.occupancy}</div>
               <div>Monthly rent: {formatRupee(property.rent)}</div>
-              <div>Maintenance status: Stable</div>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-xs">
-              <span className="text-emerald-600">Revenue +6%</span>
-              <span className="text-ink-400">AI score 88</span>
             </div>
           </Card>
         ))}
@@ -82,19 +137,49 @@ export function PropertiesPage() {
               </button>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <Input placeholder="Property name" />
-              <Input placeholder="Address" />
-              <Input placeholder="Property type" />
-              <Input placeholder="Monthly rent" />
-              <Input placeholder="Amenities" />
-              <Input placeholder="Availability" />
+              <Input
+                placeholder="Property name"
+                value={form.name}
+                onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+              />
+              <Input
+                placeholder="Address"
+                value={form.address}
+                onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
+              />
+              <Input
+                placeholder="Locality"
+                value={form.locality}
+                onChange={(e) => setForm((p) => ({ ...p, locality: e.target.value }))}
+              />
+              <Input
+                placeholder="Property type (Flat, PG, House)"
+                value={form.propertyType}
+                onChange={(e) => setForm((p) => ({ ...p, propertyType: e.target.value }))}
+              />
+              <Input
+                placeholder="Monthly rent"
+                value={form.monthlyRent}
+                onChange={(e) => setForm((p) => ({ ...p, monthlyRent: e.target.value }))}
+              />
+              <Input
+                placeholder="BHK (number)"
+                value={form.bhk}
+                onChange={(e) => setForm((p) => ({ ...p, bhk: e.target.value }))}
+              />
             </div>
-            <Textarea className="mt-4" rows={3} placeholder="Rules & conditions" />
+            <Textarea
+              className="mt-4"
+              rows={3}
+              placeholder="Rules (one per line)"
+              value={form.rules}
+              onChange={(e) => setForm((p) => ({ ...p, rules: e.target.value }))}
+            />
             <div className="mt-6 flex justify-end gap-3">
               <Button variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button>Save property</Button>
+              <Button onClick={handleCreate}>Save property</Button>
             </div>
           </Card>
         </div>

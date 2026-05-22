@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area } from 'recharts'
 import { KpiCard } from '../../components/KpiCard'
 import { InsightCard } from '../../components/InsightCard'
@@ -7,9 +8,41 @@ import { useDashboardStore } from '../../store/useDashboardStore'
 import { aiInsights } from '../../data/insights'
 import { recentActivities } from '../../data/activities'
 import { revenueSeries, occupancySeries } from '../../data/analytics'
+import { getAnalytics } from '../../services/analyticsService'
+import { formatRupee } from '../../utils/format'
 
 export function LandlordDashboard() {
-  const { kpis } = useDashboardStore()
+  const { kpis, setKpis } = useDashboardStore()
+  const [liveInsight, setLiveInsight] = useState(null)
+
+  useEffect(() => {
+    getAnalytics()
+      .then((data) => {
+        const m = data.metrics
+        setKpis([
+          {
+            id: 'collected',
+            label: 'Rent collected',
+            value: formatRupee(m.total_collected),
+            delta: `${m.success_rate}% success`
+          },
+          {
+            id: 'pending',
+            label: 'Pending rent',
+            value: formatRupee(m.total_pending),
+            delta: `${m.open_maintenance_count} open tickets`
+          },
+          {
+            id: 'occupancy',
+            label: 'Occupancy',
+            value: `${(m.occupied_property_ratio * 100).toFixed(0)}%`,
+            delta: `${(m.active_tenant_ratio * 100).toFixed(0)}% active tenants`
+          }
+        ])
+        setLiveInsight(data.insight)
+      })
+      .catch(() => {})
+  }, [setKpis])
 
   return (
     <div className="space-y-8 pb-20">
@@ -80,6 +113,16 @@ export function LandlordDashboard() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-ink-900">AI insights</h2>
           <div className="grid gap-4">
+            {liveInsight && (
+              <InsightCard
+                insight={{
+                  id: 'live',
+                  title: 'AI portfolio insight',
+                  detail: liveInsight.summary,
+                  tone: 'info'
+                }}
+              />
+            )}
             {aiInsights.map((insight) => (
               <InsightCard key={insight.id} insight={insight} />
             ))}

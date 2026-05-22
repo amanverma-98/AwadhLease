@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from beanie import PydanticObjectId
 from pydantic import BaseModel, ConfigDict, field_serializer
 
 
@@ -8,7 +9,7 @@ class APIModel(BaseModel):
 
 
 class DocumentOut(APIModel):
-    id: str
+    id: str | PydanticObjectId
 
     @field_serializer("id")
     def serialize_id(self, value):

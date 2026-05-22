@@ -20,7 +20,7 @@ Production-ready frontend for an AI-native property management and rental market
    ```
 2. Set environment variables in a .env file:
    ```bash
-   VITE_API_URL=http://localhost:8000
+   VITE_API_URL=https://awadhlease.onrender.com
    ```
 3. Run the dev server:
    ```bash

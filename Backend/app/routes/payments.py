@@ -1,0 +1,30 @@
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, Query
+
+from app.auth.dependencies import get_current_user, require_role
+from app.middleware.rate_limit import rate_limit_dependency
+from app.models.user import User
+from app.schemas.payment import PaymentCreate, PaymentOut
+from app.services.payment_service import PaymentService
+
+router = APIRouter(
+    prefix="/payments",
+    tags=["payments"],
+    dependencies=[Depends(rate_limit_dependency), Depends(get_current_user)],
+)
+service = PaymentService()
+
+
+@router.get("", response_model=list[PaymentOut])
+async def list_payments(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    user: User = Depends(get_current_user),
+):
+    return await service.list_for_user(user, skip, limit)
+
+
+@router.post("", response_model=PaymentOut, dependencies=[Depends(require_role("landlord"))])
+async def create_payment(payload: PaymentCreate, user: User = Depends(get_current_user)):
+    return await service.create_payment(payload, user)

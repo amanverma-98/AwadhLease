@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import json
 from pathlib import Path
 from typing import List
 
@@ -46,9 +47,17 @@ class Settings(BaseSettings):
     )
 
     def get_allowed_origins(self) -> List[str]:
-        if self.allowed_origins.strip() == "*":
+        raw = (self.allowed_origins or "*").strip()
+        if raw == "*":
             return ["*"]
-        return [item.strip() for item in self.allowed_origins.split(",") if item.strip()]
+        if raw.startswith("["):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(item).strip() for item in parsed if str(item).strip()]
+            except json.JSONDecodeError:
+                pass
+        return [item.strip() for item in raw.split(",") if item.strip()]
 
 
 @lru_cache

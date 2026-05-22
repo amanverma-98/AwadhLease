@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/"
     mongodb_uri: str = Field(..., alias="MONGODB_URI")
     mongodb_db: str = Field("rentpilot", alias="MONGODB_DB")
-    gemini_api_key: str = Field(..., alias="GEMINI_API_KEY")
+    gemini_api_key: str | None = Field(None, alias="GEMINI_API_KEY")
     gemini_model: str = Field("gemini-1.5-flash", alias="GEMINI_MODEL")
     system_prompt: str = Field(
         "You are RentPilot AI, an intelligent, enterprise-grade property management assistant built for Indian landlords. "

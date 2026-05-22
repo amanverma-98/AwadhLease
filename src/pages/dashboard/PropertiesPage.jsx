@@ -38,6 +38,10 @@ export function PropertiesPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {properties.map((property) => (
           <Card key={property.id} className="p-5">
+            <div
+              className="mb-4 h-32 rounded-2xl bg-cover bg-center"
+              style={{ backgroundImage: `url(${property.image})` }}
+            />
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold text-ink-900">

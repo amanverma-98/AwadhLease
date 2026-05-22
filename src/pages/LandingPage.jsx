@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Search, Sparkles, MapPin } from 'lucide-react'
 import { Button } from '../components/ui/button'
+import { useNavigate } from 'react-router-dom'
 import { Input } from '../components/ui/input'
 import { PropertyCard } from '../components/PropertyCard'
 import { usePropertyStore } from '../store/usePropertyStore'
@@ -14,21 +15,78 @@ const floatingCards = [
 ]
 
 export function LandingPage() {
+  const navigate = useNavigate()
   const { listings, filters, setFilters } = usePropertyStore()
   const filterChips = [
-    'Parking',
-    'WiFi',
-    'AC',
-    'Lift',
-    'Pet friendly',
-    'PG - Women',
-    'PG - Men',
-    'Availability: Immediate'
+    { key: 'Parking', type: 'amenity', value: 'Parking' },
+    { key: 'WiFi', type: 'amenity', value: 'WiFi' },
+    { key: 'AC', type: 'amenity', value: 'AC' },
+    { key: 'Lift', type: 'amenity', value: 'Lift' },
+    { key: 'Pet friendly', type: 'amenity', value: 'Pet Friendly' },
+    { key: 'PG - Women', type: 'occupancy', value: 'Women' },
+    { key: 'PG - Men', type: 'occupancy', value: 'Men' },
+    { key: 'Availability: Immediate', type: 'availability', value: 'Immediate' }
   ]
-
-  const filteredListings = listings.filter((listing) =>
-    listing.title.toLowerCase().includes(filters.query.toLowerCase())
+  const chipLookup = Object.fromEntries(
+    filterChips.map((chip) => [chip.key, chip])
   )
+
+  const toggleChip = (key) => {
+    setFilters({
+      features: filters.features.includes(key)
+        ? filters.features.filter((item) => item !== key)
+        : [...filters.features, key]
+    })
+  }
+
+  const filteredListings = listings
+    .filter((listing) =>
+      listing.title.toLowerCase().includes(filters.query.toLowerCase())
+    )
+    .filter((listing) =>
+      filters.type === 'All' ? true : listing.type === filters.type
+    )
+    .filter((listing) =>
+      filters.location === 'All' ? true : listing.location === filters.location
+    )
+    .filter((listing) =>
+      filters.bhk === 'All' ? true : listing.bhk === filters.bhk
+    )
+    .filter((listing) =>
+      filters.furnished === 'All'
+        ? true
+        : listing.furnished === filters.furnished
+    )
+    .filter((listing) => {
+      if (filters.pgGender === 'Any') return true
+      if (listing.type !== 'PG') return false
+      return listing.occupancy === filters.pgGender
+    })
+    .filter((listing) =>
+      filters.features.every((key) => {
+        const chip = chipLookup[key]
+        if (!chip) return true
+        if (chip.type === 'amenity') {
+          return listing.amenities.includes(chip.value)
+        }
+        if (chip.type === 'occupancy') {
+          return listing.occupancy === chip.value
+        }
+        if (chip.type === 'availability') {
+          return listing.availability === chip.value
+        }
+        return true
+      })
+    )
+    .sort((a, b) => {
+      if (filters.sortBy === 'Rent (low to high)') {
+        return a.rent - b.rent
+      }
+      if (filters.sortBy === 'Newest') {
+        return b.id.localeCompare(a.id)
+      }
+      return b.rating - a.rating
+    })
 
   return (
     <div className="px-6 pb-20">
@@ -53,12 +111,6 @@ export function LandingPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg">Find Properties</Button>
-              <Button size="lg" variant="secondary">
-                Start Free Trial
-              </Button>
-              <Button size="lg" variant="ghost">
-                Book Demo
-              </Button>
             </div>
             <div className="glass-panel rounded-3xl p-4 shadow-card">
               <div className="flex flex-wrap items-center gap-4">
@@ -68,7 +120,9 @@ export function LandingPage() {
                     className="border-none p-0 shadow-none"
                     placeholder="Search flats, PGs, houses, commercial"
                     value={filters.query}
-                    onChange={(event) => setFilters({ query: event.target.value })}
+                    onChange={(event) =>
+                      setFilters({ query: event.target.value })
+                    }
                   />
                 </div>
                 <div className="flex items-center gap-2 rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-500">
@@ -105,9 +159,6 @@ export function LandingPage() {
                 </div>
               </div>
             </div>
-            <div className="absolute -left-8 top-16 hidden w-40 animate-floaty rounded-3xl bg-brand-500/15 p-4 text-xs font-semibold text-brand-700 shadow-glow md:block">
-              AI predicted occupancy lift +12%
-            </div>
             <div className="absolute -bottom-6 right-6 hidden w-44 animate-floaty rounded-3xl bg-emerald-500/15 p-4 text-xs font-semibold text-emerald-700 shadow-glow md:block">
               Rent automation active in 18 units
             </div>
@@ -127,51 +178,79 @@ export function LandingPage() {
               <option key={type}>{type}</option>
             ))}
           </select>
-          <select className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48">
-            <option>BHK</option>
+          <select
+            className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48"
+            value={filters.bhk}
+            onChange={(event) => setFilters({ bhk: event.target.value })}
+          >
+            <option>All</option>
             <option>1 BHK</option>
             <option>2 BHK</option>
             <option>3 BHK</option>
             <option>4+ BHK</option>
           </select>
-          <select className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48">
+          <select
+            className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48"
+            value={filters.location}
+            onChange={(event) => setFilters({ location: event.target.value })}
+          >
+            <option>All</option>
             {lucknowLocations.map((location) => (
               <option key={location}>{location}</option>
             ))}
           </select>
-          <select className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48">
-            <option>Budget</option>
+          <select
+            className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48"
+            value={filters.budget}
+            onChange={(event) => setFilters({ budget: event.target.value })}
+          >
+            <option>Any</option>
             <option>Under 15k</option>
             <option>15k - 30k</option>
             <option>30k - 60k</option>
             <option>60k+</option>
           </select>
-          <select className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48">
-            <option>Furnished</option>
+          <select
+            className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48"
+            value={filters.furnished}
+            onChange={(event) => setFilters({ furnished: event.target.value })}
+          >
+            <option>All</option>
             <option>Fully furnished</option>
             <option>Semi-furnished</option>
             <option>Unfurnished</option>
           </select>
-          <select className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48">
-            <option>PG gender</option>
+          <select
+            className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48"
+            value={filters.pgGender}
+            onChange={(event) => setFilters({ pgGender: event.target.value })}
+          >
+            <option>Any</option>
             <option>Women</option>
             <option>Men</option>
-            <option>Any</option>
           </select>
-          <select className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48">
-            <option>Sort by</option>
-            <option>Rent (low to high)</option>
+          <select
+            className="w-full rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm text-ink-700 md:w-48"
+            value={filters.sortBy}
+            onChange={(event) => setFilters({ sortBy: event.target.value })}
+          >
             <option>Popularity</option>
+            <option>Rent (low to high)</option>
             <option>Newest</option>
           </select>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {filterChips.map((chip) => (
             <button
-              key={chip}
-              className="rounded-full border border-ink-100 bg-white px-3 py-1 text-xs font-semibold text-ink-600"
+              key={chip.key}
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                filters.features.includes(chip.key)
+                  ? 'border-brand-500 bg-brand-500 text-white shadow-glow'
+                  : 'border-ink-100 bg-white text-ink-600'
+              }`}
+              onClick={() => toggleChip(chip.key)}
             >
-              {chip}
+              {chip.key}
             </button>
           ))}
         </div>
@@ -187,7 +266,9 @@ export function LandingPage() {
               Curated listings in Lucknow
             </h2>
           </div>
-          <Button variant="secondary">View all</Button>
+          <Button variant="secondary" onClick={() => navigate('/properties')}>
+            View all
+          </Button>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredListings.map((property) => (

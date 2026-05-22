@@ -14,6 +14,7 @@ export function ListingDetails() {
   const [submitted, setSubmitted] = useState(false)
   const [contacted, setContacted] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', date: '' })
+  const [activeImage, setActiveImage] = useState('')
 
   useEffect(() => {
     const saved = localStorage.getItem('rentpilot-visit')
@@ -26,6 +27,12 @@ export function ListingDetails() {
     () => properties.find((item) => item.id === id),
     [id]
   )
+
+  useEffect(() => {
+    if (property?.gallery?.length) {
+      setActiveImage(property.gallery[0])
+    }
+  }, [property])
 
   if (!property) {
     return (
@@ -44,14 +51,26 @@ export function ListingDetails() {
     <div className="mx-auto max-w-6xl px-6 py-12">
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            {property.gallery.map((image, index) => (
-              <div
-                key={`${property.id}-img-${index}`}
-                className="h-56 rounded-3xl"
-                style={{ backgroundImage: image }}
-              />
-            ))}
+          <div className="space-y-4">
+            <div
+              className="h-80 rounded-3xl bg-cover bg-center shadow-card"
+              style={{ backgroundImage: `url(${activeImage})` }}
+            />
+            <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+              {property.gallery.map((image, index) => (
+                <button
+                  key={`${property.id}-thumb-${index}`}
+                  className={`h-20 rounded-2xl bg-cover bg-center transition ${
+                    activeImage === image
+                      ? 'ring-2 ring-brand-500'
+                      : 'ring-1 ring-ink-100'
+                  }`}
+                  style={{ backgroundImage: `url(${image})` }}
+                  onClick={() => setActiveImage(image)}
+                  aria-label="Preview property image"
+                />
+              ))}
+            </div>
           </div>
           <div>
             <h1 className="text-3xl font-semibold text-ink-900">
@@ -166,7 +185,7 @@ export function ListingDetails() {
             </Button>
             {contacted && (
               <p className="mt-3 text-xs text-ink-500">
-                Landlord notified. Continue chat inside RentPilot AI.
+                Landlord notified. Continue chat inside AwadhLease.
               </p>
             )}
           </Card>

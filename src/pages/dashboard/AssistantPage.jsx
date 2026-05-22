@@ -64,7 +64,7 @@ export function AssistantPage() {
 
       <Card className="flex h-[70vh] flex-col">
         <div className="border-b border-ink-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-ink-900">RentPilot AI</h2>
+          <h2 className="text-lg font-semibold text-ink-900">AwadhLease</h2>
           <p className="text-xs text-ink-500">
             Smart summaries and automation suggestions.
           </p>
@@ -91,7 +91,7 @@ export function AssistantPage() {
         <div className="border-t border-ink-100 px-6 py-4">
           <div className="flex flex-wrap gap-3">
             <Input
-              placeholder="Ask RentPilot AI anything"
+              placeholder="Ask AwadhLease anything"
               value={message}
               onChange={(event) => setMessage(event.target.value)}
             />

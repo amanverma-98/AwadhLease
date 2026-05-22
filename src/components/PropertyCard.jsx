@@ -1,23 +1,38 @@
 import { Heart, MapPin, Star } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Badge } from './ui/badge'
 import { Card } from './ui/card'
 import { formatRupee } from '../utils/format'
 import { usePropertyStore } from '../store/usePropertyStore'
 
 export function PropertyCard({ property }) {
+  const navigate = useNavigate()
   const { favorites, toggleFavorite } = usePropertyStore()
   const isFavorite = favorites.includes(property.id)
 
   return (
-    <Card className="overflow-hidden transition hover:-translate-y-1 hover:shadow-card">
+    <Card
+      className="cursor-pointer overflow-hidden transition hover:-translate-y-1 hover:shadow-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => navigate(`/listing/${property.id}`)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          navigate(`/listing/${property.id}`)
+        }
+      }}
+    >
       <div
-        className="relative h-44 w-full"
-        style={{ backgroundImage: property.image }}
+        className="relative h-44 w-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${property.image})` }}
       >
         <button
           className="absolute right-3 top-3 rounded-full bg-white/80 p-2"
-          onClick={() => toggleFavorite(property.id)}
+          onClick={(event) => {
+            event.stopPropagation()
+            toggleFavorite(property.id)
+          }}
           aria-label="Save property"
         >
           <Heart
@@ -57,12 +72,9 @@ export function PropertyCard({ property }) {
             {formatRupee(property.rent)}
             <span className="text-xs font-medium text-ink-500">/mo</span>
           </p>
-          <Link
-            to={`/listing/${property.id}`}
-            className="text-xs font-semibold text-brand-600"
-          >
-            View details
-          </Link>
+          <span className="text-xs font-semibold text-brand-600">
+            Tap to view
+          </span>
         </div>
       </div>
     </Card>

@@ -20,7 +20,7 @@ export function LoginPage() {
       <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-5">
           <p className="text-xs uppercase tracking-[0.2em] text-white/60">
-            RentPilot AI
+            AwadhLease
           </p>
           <h1 className="text-3xl font-semibold">
             AI-secured access for landlords and tenants.
@@ -35,13 +35,9 @@ export function LoginPage() {
             </p>
           </div>
         </div>
-        <div className="glass-panel rounded-3xl p-8 text-ink-900 shadow-card">
+          <div className="glass-panel rounded-3xl p-8 text-ink-900 shadow-card">
           <h2 className="text-xl font-semibold text-ink-900">Login</h2>
           <div className="mt-6 space-y-4">
-            <Button variant="secondary" className="w-full">
-              Continue with Google
-            </Button>
-            <div className="text-center text-xs text-ink-400">or</div>
             <Input
               placeholder="Email"
               value={form.email}

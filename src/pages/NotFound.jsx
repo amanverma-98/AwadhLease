@@ -6,7 +6,7 @@ export function NotFound() {
       <div className="rounded-3xl border border-ink-100 bg-white/80 p-10 text-center shadow-card">
         <h1 className="text-2xl font-semibold text-ink-900">Page not found</h1>
         <p className="mt-2 text-sm text-ink-500">
-          Return to the RentPilot AI marketplace.
+          Return to the AwadhLease marketplace.
         </p>
         <Link
           to="/"

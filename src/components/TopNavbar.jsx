@@ -13,11 +13,18 @@ export function TopNavbar({ title }) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-ink-100 bg-white/80 px-6 py-4 shadow-soft backdrop-blur">
-      <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-ink-400">
-          RentPilot AI
-        </p>
-        <h1 className="text-xl font-semibold text-ink-900">{title}</h1>
+      <div className="flex items-center gap-3">
+        <img
+          src="/Gemini_Generated_Image_jy8lqtjy8lqtjy8l.png"
+          alt="AwadhLease"
+          className="h-9 w-9 rounded-2xl object-cover shadow-soft"
+        />
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-ink-400">
+            AwadhLease
+          </p>
+          <h1 className="text-xl font-semibold text-ink-900">{title}</h1>
+        </div>
       </div>
       <div className="flex flex-1 items-center gap-3 md:max-w-md">
         <div className="flex flex-1 items-center gap-2 rounded-2xl border border-ink-100 bg-white px-4 py-2 text-sm text-ink-500">

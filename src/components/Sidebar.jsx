@@ -53,12 +53,14 @@ export function Sidebar({ variant = 'landlord' }) {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-500 text-white shadow-glow">
-              RP
-            </div>
+            <img
+              src="/Gemini_Generated_Image_jy8lqtjy8lqtjy8l.png"
+              alt="AwadhLease"
+              className="h-10 w-10 rounded-2xl object-cover shadow-soft"
+            />
             {!collapsed && (
               <div>
-                <p className="text-sm font-semibold text-ink-900">RentPilot AI</p>
+                <p className="text-sm font-semibold text-ink-900">AwadhLease</p>
                 <p className="text-xs text-ink-400">Intelligent rentals</p>
               </div>
             )}
@@ -92,7 +94,7 @@ export function Sidebar({ variant = 'landlord' }) {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-2xl bg-ink-900 px-4 py-4 text-white shadow-glow">
+        <div className="mt-auto rounded-2xl bg-gradient-to-br from-ink-900 to-brand-600 px-4 py-4 text-white shadow-glow">
           <p className="text-xs uppercase tracking-[0.2em] text-white/60">
             AI Status
           </p>

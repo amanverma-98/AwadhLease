@@ -12,9 +12,14 @@ export const usePropertyStore = create((set) => ({
     })),
   filters: {
     query: '',
-    location: 'Lucknow',
+    location: 'All',
     type: 'All',
-    budget: 60000
+    bhk: 'All',
+    furnished: 'All',
+    pgGender: 'Any',
+    budget: 'Any',
+    sortBy: 'Popularity',
+    features: []
   },
   setFilters: (filters) =>
     set((state) => ({ filters: { ...state.filters, ...filters } }))

@@ -1,10 +1,20 @@
-const baseGradient = [
-  'linear-gradient(135deg, rgba(99,102,241,0.65), rgba(14,165,233,0.5))',
-  'linear-gradient(135deg, rgba(15,23,42,0.85), rgba(34,197,94,0.55))',
-  'linear-gradient(135deg, rgba(30,64,175,0.7), rgba(59,130,246,0.45))',
-  'linear-gradient(135deg, rgba(16,185,129,0.7), rgba(20,184,166,0.45))',
-  'linear-gradient(135deg, rgba(79,70,229,0.6), rgba(236,72,153,0.4))'
-]
+const makeImage = (title, accent) => {
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="${accent}" />
+          <stop offset="100%" stop-color="#0f172a" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="800" fill="url(#g)" />
+      <rect x="60" y="520" width="1080" height="200" rx="32" fill="rgba(255,255,255,0.15)" />
+      <text x="90" y="600" font-family="Manrope, Arial" font-size="42" fill="white">${title}</text>
+      <text x="90" y="660" font-family="Manrope, Arial" font-size="24" fill="white" opacity="0.8">AwadhLease preview</text>
+    </svg>`
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
 
 export const properties = [
   {
@@ -20,8 +30,12 @@ export const properties = [
     furnished: 'Semi-furnished',
     description: 'Sunlit 3 BHK with smart security, AI energy monitor, and skyline balcony views.',
     amenities: ['Parking', 'WiFi', 'AC', 'Lift'],
-    image: baseGradient[0],
-    gallery: [baseGradient[0], baseGradient[2], baseGradient[4]],
+    image: makeImage('Skyline Residences A-302', '#6366f1'),
+    gallery: [
+      makeImage('Skyline Residences A-302', '#6366f1'),
+      makeImage('Skyline Residences - Living', '#0ea5e9'),
+      makeImage('Skyline Residences - Balcony', '#22c55e')
+    ],
     rules: ['No loud music after 10 PM', 'ID verification required', 'Pets allowed with deposit'],
     requirements: ['Minimum 6-month lease', 'Employment proof'],
     availability: 'Immediate',
@@ -41,8 +55,12 @@ export const properties = [
     furnished: 'Fully furnished',
     description: 'Colonial style bungalow with AI-assisted maintenance and private garden space.',
     amenities: ['Parking', 'Pet Friendly', 'WiFi'],
-    image: baseGradient[1],
-    gallery: [baseGradient[1], baseGradient[3], baseGradient[0]],
+    image: makeImage('Hazratganj Heritage House', '#0f172a'),
+    gallery: [
+      makeImage('Hazratganj Heritage House', '#0f172a'),
+      makeImage('Hazratganj Garden View', '#10b981'),
+      makeImage('Hazratganj Lounge', '#6366f1')
+    ],
     rules: ['Garden upkeep shared', 'Security deposit mandatory'],
     requirements: ['Corporate lease preferred'],
     availability: 'Within 15 days',
@@ -62,8 +80,12 @@ export const properties = [
     furnished: 'Fully furnished',
     description: 'Smart co-living PG with biometric access, AI meal planner, and weekly housekeeping.',
     amenities: ['WiFi', 'AC', 'Lift'],
-    image: baseGradient[2],
-    gallery: [baseGradient[2], baseGradient[4], baseGradient[3]],
+    image: makeImage('Indira Nagar Co-Live Suites', '#1e40af'),
+    gallery: [
+      makeImage('Indira Nagar Co-Live Suites', '#1e40af'),
+      makeImage('Co-Live Lounge', '#ec4899'),
+      makeImage('Co-Live Rooms', '#14b8a6')
+    ],
     rules: ['No overnight guests', 'Quiet hours after 11 PM'],
     requirements: ['Student or working professional ID'],
     availability: 'Immediate',
@@ -83,8 +105,12 @@ export const properties = [
     furnished: 'Customizable',
     description: 'Premium office space with AI occupancy analytics and smart utilities.',
     amenities: ['Parking', 'WiFi', 'Lift'],
-    image: baseGradient[3],
-    gallery: [baseGradient[3], baseGradient[1], baseGradient[2]],
+    image: makeImage('Aliganj WorkHub Suites', '#10b981'),
+    gallery: [
+      makeImage('Aliganj WorkHub Suites', '#10b981'),
+      makeImage('WorkHub Boardroom', '#0f172a'),
+      makeImage('WorkHub Lounge', '#1e40af')
+    ],
     rules: ['Business registration required', '24x7 access'],
     requirements: ['Company profile'],
     availability: 'Immediate',
@@ -104,8 +130,12 @@ export const properties = [
     furnished: 'Unfurnished',
     description: 'Affordable 2 BHK with AI-enabled rent reminders and secure access.',
     amenities: ['Parking', 'Pet Friendly'],
-    image: baseGradient[4],
-    gallery: [baseGradient[4], baseGradient[0], baseGradient[1]],
+    image: makeImage('Jankipuram Emerald Enclave', '#4f46e5'),
+    gallery: [
+      makeImage('Jankipuram Emerald Enclave', '#4f46e5'),
+      makeImage('Emerald Enclave Living', '#6366f1'),
+      makeImage('Emerald Enclave Exterior', '#0f172a')
+    ],
     rules: ['No major structural changes', 'Monthly maintenance fees'],
     requirements: ['Government ID'],
     availability: 'Immediate',

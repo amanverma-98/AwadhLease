@@ -7,10 +7,11 @@ from app.core.config import Settings
 
 
 def apply_cors(app: FastAPI, settings: Settings) -> None:
+    origins = settings.get_allowed_origins()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.get_allowed_origins(),
-        allow_credentials=True,
+        allow_origins=origins,
+        allow_credentials="*" not in origins,
         allow_methods=["*"],
         allow_headers=["*"],
     )

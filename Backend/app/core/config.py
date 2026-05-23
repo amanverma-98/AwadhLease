@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import json
 from pathlib import Path
 from typing import List
 
@@ -28,6 +29,7 @@ class Settings(BaseSettings):
     )
     rate_limit_per_minute: int = Field(120, alias="RATE_LIMIT_PER_MINUTE")
     allowed_origins: str = Field(default="*", alias="ALLOWED_ORIGINS")
+    allowed_origins_regex: str | None = Field(default=None, alias="ALLOWED_ORIGINS_REGEX")
     jwt_secret: str = Field("change-me", alias="JWT_SECRET")
     jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
     access_token_minutes: int = Field(30, alias="ACCESS_TOKEN_MINUTES")
@@ -46,9 +48,21 @@ class Settings(BaseSettings):
     )
 
     def get_allowed_origins(self) -> List[str]:
-        if self.allowed_origins.strip() == "*":
+        raw = (self.allowed_origins or "*").strip()
+        if raw == "*":
             return ["*"]
-        return [item.strip() for item in self.allowed_origins.split(",") if item.strip()]
+        if raw.startswith("["):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [
+                        str(item).strip().rstrip("/")
+                        for item in parsed
+                        if str(item).strip()
+                    ]
+            except json.JSONDecodeError:
+                pass
+        return [item.strip().rstrip("/") for item in raw.split(",") if item.strip()]
 
 
 @lru_cache

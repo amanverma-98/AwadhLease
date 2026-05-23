@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Dict
 
+from beanie.operators import In
+
 from app.agents.analytics_agent import AnalyticsAgent
 from app.core.config import get_settings
 from app.models.maintenance import MaintenanceTicket
@@ -31,7 +33,7 @@ class AnalyticsService:
 
         total_tenants = await Tenant.find().count()
         active_tenants = await Tenant.find(
-            Tenant.rent_status.in_(["Paid", "Pending"])
+            In(Tenant.rent_status, ["Paid", "Pending"])
         ).count()
         active_ratio = (active_tenants / total_tenants) if total_tenants else 0.0
 

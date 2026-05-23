@@ -14,3 +14,9 @@ class UserOut(DocumentOut):
     role: str
     is_active: bool
     created_at: datetime
+
+
+class UserUpdate(BaseModel):
+    full_name: str | None = None
+    email: str | None = None
+    phone: str | None = None

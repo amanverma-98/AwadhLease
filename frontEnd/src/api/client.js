@@ -2,11 +2,11 @@ import axios from 'axios'
 import { clearAuth, loadAuth, saveAuth } from '../utils/authStorage'
 import { getApiErrorMessage } from '../utils/apiError'
 
-const baseURL = import.meta.env.VITE_API_URL
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000' 
 
-if (!baseURL) {
-  throw new Error('VITE_API_URL is not set. Define it in your .env file.')
-}
+// if (!baseURL) {
+//   throw new Error('VITE_API_URL is not set. Define it in your .env file.')
+// }
 
 const apiClient = axios.create({
   baseURL,

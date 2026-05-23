@@ -133,6 +133,7 @@ export function TenantsPage() {
               />
               <Input
                 placeholder="Email"
+                type="email"
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               />

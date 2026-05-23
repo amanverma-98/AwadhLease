@@ -5,12 +5,15 @@ from fastapi import APIRouter, Depends
 from app.auth.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.auth import (
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
     LoginRequest,
     RefreshRequest,
     RegisterLandlordRequest,
     TokenResponse,
     UserMeResponse,
 )
+from app.schemas.user import UserUpdate
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -32,6 +35,16 @@ async def refresh(payload: RefreshRequest):
     return await service.refresh(payload.refresh_token)
 
 
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
+async def forgot_password(payload: ForgotPasswordRequest):
+    return await service.request_password_reset(payload.email)
+
+
 @router.get("/me", response_model=UserMeResponse)
 async def get_me(user: User = Depends(get_current_user)):
     return await service.get_me(user)
+
+
+@router.put("/me", response_model=UserMeResponse)
+async def update_me(payload: UserUpdate, user: User = Depends(get_current_user)):
+    return await service.update_me(user, payload)

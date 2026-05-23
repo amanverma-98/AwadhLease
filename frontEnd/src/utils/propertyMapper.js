@@ -102,11 +102,23 @@ export function buildPropertyQueryParams(filters = {}) {
   return params
 }
 
+const splitList = (value, delimiterRegex) =>
+  value
+    ? value
+        .split(delimiterRegex)
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : []
+
 export function mapPropertyToCreatePayload(form) {
+  const imageList = Array.isArray(form.imageUrls)
+    ? form.imageUrls
+    : splitList(form.images, /\n|,/g)
+
   return {
     name: form.name,
     address: form.address,
-    city: 'Lucknow',
+    city: form.city || 'Lucknow',
     locality: form.locality || form.address,
     property_type: form.propertyType,
     bhk: form.bhk ? Number(form.bhk) : null,
@@ -114,12 +126,16 @@ export function mapPropertyToCreatePayload(form) {
     occupancy_status: form.occupancyStatus || 'available',
     monthly_rent: Number(form.monthlyRent),
     security_deposit: form.securityDeposit ? Number(form.securityDeposit) : null,
-    amenities: form.amenities
-      ? form.amenities.split(',').map((item) => item.trim()).filter(Boolean)
-      : [],
-    rules: form.rules
-      ? form.rules.split('\n').map((item) => item.trim()).filter(Boolean)
-      : [],
+    images: imageList,
+    amenities: splitList(form.amenities, /,/g),
+    rules: splitList(form.rules, /\n/g),
+    available_from: form.availableFrom
+      ? new Date(form.availableFrom).toISOString()
+      : null,
+    parking: form.parking || false,
+    wifi: form.wifi || false,
+    ac: form.ac || false,
+    pet_friendly: form.petFriendly || false,
     description: form.description || null
   }
 }

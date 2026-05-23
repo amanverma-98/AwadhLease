@@ -3,11 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from beanie import Document
+from beanie import Document, Link
 from pydantic import Field
 
+from app.models.landlord import Landlord
 
 class Property(Document):
+    landlord_id: Link[Landlord] | None = Field(default=None, index=True)
     name: str = Field(index=True)
     address: str
     city: str = "Lucknow"

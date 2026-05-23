@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
 from app.schemas.base import DocumentOut
 
@@ -57,6 +57,7 @@ class PropertyUpdate(BaseModel):
 
 
 class PropertyOut(DocumentOut):
+    landlord_id: str | None = None
     name: str
     address: str
     city: str
@@ -80,3 +81,17 @@ class PropertyOut(DocumentOut):
     description: str | None
     created_at: datetime
     updated_at: datetime
+
+    @field_serializer("landlord_id")
+    def serialize_landlord_id(self, value):
+        return "" if value is None else str(value)
+
+
+class ContactLandlordRequest(BaseModel):
+    name: str
+    phone: str
+    message: str | None = None
+
+
+class ContactLandlordResponse(BaseModel):
+    status: str

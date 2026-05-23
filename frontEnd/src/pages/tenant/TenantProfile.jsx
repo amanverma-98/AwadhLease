@@ -5,9 +5,10 @@ import { Input } from '../../components/ui/input'
 import { loadTenantContext, saveTenantContext } from '../../utils/authStorage'
 import { useUserStore } from '../../store/useUserStore'
 import { useNotificationStore } from '../../store/useNotificationStore'
+import { updateMe } from '../../services/authService'
 
 export function TenantProfile() {
-  const { user } = useUserStore()
+  const { user, login } = useUserStore()
   const { pushToast } = useNotificationStore()
   const saved = loadTenantContext()
   const [form, setForm] = useState({
@@ -18,12 +19,22 @@ export function TenantProfile() {
     propertyId: saved?.propertyId || ''
   })
 
-  const handleSave = () => {
-    saveTenantContext({
-      tenantId: form.tenantId,
-      propertyId: form.propertyId
-    })
-    pushToast({ title: 'Profile saved', message: 'Tenant context stored locally.' })
+  const handleSave = async () => {
+    try {
+      const data = await updateMe({
+        full_name: form.fullName,
+        email: form.email,
+        phone: form.phone
+      })
+      login({ name: data.full_name, email: data.email, role: data.role })
+      saveTenantContext({
+        tenantId: form.tenantId,
+        propertyId: form.propertyId
+      })
+      pushToast({ title: 'Profile saved', message: 'Profile synced with backend.' })
+    } catch (error) {
+      pushToast({ title: 'Save failed', message: error.message })
+    }
   }
 
   return (
@@ -43,6 +54,7 @@ export function TenantProfile() {
           />
           <Input
             placeholder="Email"
+            type="email"
             value={form.email}
             onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
           />

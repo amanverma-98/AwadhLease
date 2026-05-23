@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from app.auth.dependencies import get_current_user, require_role
 from app.middleware.rate_limit import rate_limit_dependency
 from app.models.user import User
-from app.schemas.payment import PaymentCreate, PaymentOut
+from app.schemas.payment import PaymentCreate, PaymentOut, TenantPaymentCreate
 from app.services.payment_service import PaymentService
 
 router = APIRouter(
@@ -28,3 +28,14 @@ async def list_payments(
 @router.post("", response_model=PaymentOut, dependencies=[Depends(require_role("landlord"))])
 async def create_payment(payload: PaymentCreate, user: User = Depends(get_current_user)):
     return await service.create_payment(payload, user)
+
+
+@router.post(
+    "/tenant",
+    response_model=PaymentOut,
+    dependencies=[Depends(require_role("tenant"))],
+)
+async def create_tenant_payment(
+    payload: TenantPaymentCreate, user: User = Depends(get_current_user)
+):
+    return await service.create_tenant_payment(payload, user)

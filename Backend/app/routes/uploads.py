@@ -11,4 +11,4 @@ service = UploadService()
 
 @router.post("", response_model=UploadResponse)
 async def upload_file(file: UploadFile):
-    return await service.save_upload(file.filename)
+    return await service.upload_image(file)

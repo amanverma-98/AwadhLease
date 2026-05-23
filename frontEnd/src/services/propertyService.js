@@ -14,3 +14,8 @@ export async function createProperty(payload) {
   const { data } = await apiClient.post('/properties', payload)
   return data
 }
+
+export async function contactLandlord(propertyId, payload) {
+  const { data } = await apiClient.post(`/properties/${propertyId}/contact`, payload)
+  return data
+}

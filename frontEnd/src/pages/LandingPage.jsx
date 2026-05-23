@@ -125,7 +125,9 @@ export function LandingPage() {
               run properties using intelligent AI agents.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button size="lg">Find Properties</Button>
+              <Button size="lg" onClick={() => navigate('/properties')}>
+                Find Properties
+              </Button>
             </div>
             <div className="glass-panel rounded-3xl p-4 shadow-card">
               <div className="flex flex-wrap items-center gap-4">

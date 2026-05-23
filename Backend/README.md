@@ -24,6 +24,8 @@ pip install -r requirements.txt
 Copy .env.example to .env and update values.
 ```
 
+Cloudinary is required for image uploads. Provide either `CLOUDINARY_URL` or the key/name/secret trio.
+
 3. Run the API:
 
 ```bash

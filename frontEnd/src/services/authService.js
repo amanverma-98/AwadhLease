@@ -24,3 +24,13 @@ export async function detectUserRole() {
     throw error
   }
 }
+
+export async function requestPasswordReset(email) {
+  const { data } = await apiClient.post('/auth/forgot-password', { email })
+  return data
+}
+
+export async function updateMe(payload) {
+  const { data } = await apiClient.put('/auth/me', payload)
+  return data
+}

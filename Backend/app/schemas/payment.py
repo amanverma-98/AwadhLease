@@ -15,6 +15,12 @@ class PaymentCreate(BaseModel):
     payment_status: str
 
 
+class TenantPaymentCreate(BaseModel):
+    amount: float
+    payment_date: datetime | None = None
+    payment_status: str = "paid"
+
+
 class PaymentOut(DocumentOut):
     tenant_id: str
     property_id: str

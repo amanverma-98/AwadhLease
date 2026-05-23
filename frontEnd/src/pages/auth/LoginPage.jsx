@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { useUserStore } from '../../store/useUserStore'
@@ -10,6 +11,7 @@ export function LoginPage() {
   const { loginWithCredentials, isLoading, authError } = useUserStore()
   const { pushToast } = useNotificationStore()
   const [form, setForm] = useState({ email: '', password: '' })
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = async () => {
     if (!form.email || !form.password) {
@@ -47,19 +49,30 @@ export function LoginPage() {
           <div className="mt-6 space-y-4">
             <Input
               placeholder="Email"
+              type="email"
               value={form.email}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, email: event.target.value }))
               }
             />
-            <Input
-              placeholder="Password"
-              type="password"
-              value={form.password}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, password: event.target.value }))
-              }
-            />
+            <div className="relative">
+              <Input
+                placeholder="Password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, password: event.target.value }))
+                }
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {authError && (
               <p className="text-xs text-rose-600">{authError}</p>
             )}

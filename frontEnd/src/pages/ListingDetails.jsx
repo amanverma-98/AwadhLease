@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { MapPin, PhoneCall } from 'lucide-react'
 import { properties as mockProperties } from '../data/properties'
-import { getProperty } from '../services/propertyService'
+import { contactLandlord, getProperty } from '../services/propertyService'
 import { createBooking } from '../services/bookingService'
 import { mapPropertyFromApi } from '../utils/propertyMapper'
 import { Badge } from '../components/ui/badge'
@@ -22,6 +22,7 @@ export function ListingDetails() {
   const [property, setProperty] = useState(null)
   const [form, setForm] = useState({ name: '', phone: '', date: '', message: '' })
   const [activeImage, setActiveImage] = useState('')
+  const [contactMessage, setContactMessage] = useState('')
 
   useEffect(() => {
     const saved = localStorage.getItem('rentpilot-visit')
@@ -79,6 +80,24 @@ export function ListingDetails() {
       pushToast({ title: 'Visit booked', message: 'Landlord will confirm shortly.' })
     } catch (error) {
       pushToast({ title: 'Booking failed', message: error.message })
+    }
+  }
+
+  const handleContact = async () => {
+    if (!form.name || !form.phone) {
+      pushToast({ title: 'Missing details', message: 'Fill name and phone.' })
+      return
+    }
+    try {
+      await contactLandlord(id, {
+        name: form.name,
+        phone: form.phone,
+        message: contactMessage || null
+      })
+      setContacted(true)
+      pushToast({ title: 'Sent', message: 'Landlord notified of your request.' })
+    } catch (error) {
+      pushToast({ title: 'Send failed', message: error.message })
     }
   }
 
@@ -224,18 +243,23 @@ export function ListingDetails() {
             <h3 className="text-lg font-semibold text-ink-900">
               Contact landlord
             </h3>
-            <Textarea placeholder="Share your requirements" rows={4} />
+            <Textarea
+              placeholder="Share your requirements"
+              rows={4}
+              value={contactMessage}
+              onChange={(event) => setContactMessage(event.target.value)}
+            />
             <Button
               className="mt-4 w-full"
               variant="secondary"
-              onClick={() => setContacted(true)}
+              onClick={handleContact}
             >
               <PhoneCall className="mr-2 h-4 w-4" />
               Send details
             </Button>
             {contacted && (
               <p className="mt-3 text-xs text-ink-500">
-                Landlord messaging API is not available yet — use site visit booking.
+                Your message has been sent to the landlord.
               </p>
             )}
           </Card>

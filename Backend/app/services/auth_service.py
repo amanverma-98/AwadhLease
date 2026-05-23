@@ -11,7 +11,13 @@ from app.core.security import (
 )
 from app.models.landlord import Landlord
 from app.models.user import User
-from app.schemas.auth import RegisterLandlordRequest, TokenResponse, UserMeResponse
+from app.schemas.auth import (
+    ForgotPasswordResponse,
+    RegisterLandlordRequest,
+    TokenResponse,
+    UserMeResponse,
+)
+from app.schemas.user import UserUpdate
 from app.utils.user_context import resolve_profile_context
 
 
@@ -78,6 +84,18 @@ class AuthService:
             lease_end=lease_end,
             rent_status=rent_status,
         )
+
+    async def request_password_reset(self, email: str) -> ForgotPasswordResponse:
+        # Do not reveal whether the email exists.
+        _ = await User.find(User.email == email).first_or_none()
+        return ForgotPasswordResponse(status="sent")
+
+    async def update_me(self, user: User, payload: UserUpdate) -> UserMeResponse:
+        update_data = payload.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(user, key, value)
+        await user.save()
+        return await self.get_me(user)
 
     @staticmethod
     def _issue_tokens(user_id: str, role: str) -> TokenResponse:

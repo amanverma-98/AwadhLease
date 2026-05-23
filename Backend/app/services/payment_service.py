@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import List
 
 from beanie import PydanticObjectId
@@ -10,7 +11,7 @@ from app.models.payment import Payment
 from app.models.property import Property
 from app.models.tenant import Tenant
 from app.models.user import User
-from app.schemas.payment import PaymentCreate, PaymentOut
+from app.schemas.payment import PaymentCreate, PaymentOut, TenantPaymentCreate
 from app.utils.user_context import get_tenant_for_user
 
 
@@ -62,6 +63,27 @@ class PaymentService:
             property_id=property_doc,
             amount=payload.amount,
             payment_date=payload.payment_date,
+            payment_status=payload.payment_status,
+        )
+        await doc.insert()
+        return PaymentOut.model_validate(doc)
+
+    async def create_tenant_payment(self, payload: TenantPaymentCreate, user: User) -> PaymentOut:
+        tenant_doc = await get_tenant_for_user(user)
+        if not tenant_doc:
+            raise HTTPException(status_code=404, detail="Tenant profile not found")
+        if not tenant_doc.property_id:
+            raise HTTPException(status_code=404, detail="Tenant property not found")
+
+        property_doc = await Property.get(tenant_doc.property_id.id)
+        if not property_doc:
+            raise HTTPException(status_code=404, detail="Property not found")
+
+        doc = Payment(
+            tenant_id=tenant_doc,
+            property_id=property_doc,
+            amount=payload.amount,
+            payment_date=payload.payment_date or datetime.utcnow(),
             payment_status=payload.payment_status,
         )
         await doc.insert()

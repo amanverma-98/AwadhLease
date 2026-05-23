@@ -6,7 +6,9 @@ from typing import List, Tuple
 from beanie import PydanticObjectId
 from fastapi import HTTPException
 
+from app.models.landlord import Landlord
 from app.models.property import Property
+from app.models.user import User
 from app.schemas.property import PropertyCreate, PropertyOut, PropertyUpdate
 
 
@@ -73,8 +75,9 @@ class PropertyService:
             raise HTTPException(status_code=404, detail="Property not found")
         return PropertyOut.model_validate(doc)
 
-    async def create_property(self, payload: PropertyCreate) -> PropertyOut:
-        doc = Property(**payload.model_dump())
+    async def create_property(self, payload: PropertyCreate, user: User) -> PropertyOut:
+        landlord = await Landlord.find(Landlord.user_id.id == user.id).first_or_none()
+        doc = Property(**payload.model_dump(), landlord_id=landlord)
         await doc.insert()
         return PropertyOut.model_validate(doc)
 

@@ -73,6 +73,18 @@ class TenantService:
                 raise HTTPException(status_code=404, detail="Landlord not found")
             landlord_doc = explicit
 
+        existing = await Tenant.find(
+            Tenant.landlord_id.id == landlord_doc.id,
+            Tenant.property_id.id == property_doc.id,
+            Tenant.email == payload.email,
+            Tenant.phone == payload.phone,
+        ).first_or_none()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="Tenant already exists for this property and contact info",
+            )
+
         temp_password = secrets.token_urlsafe(8)
         user = User(
             full_name=payload.full_name,

@@ -26,3 +26,21 @@ export function mapTenantFromApi(tenant, propertyName = '') {
     _raw: tenant
   }
 }
+
+export function dedupeTenants(tenants = []) {
+  const seen = new Map()
+  const result = []
+  for (const tenant of tenants) {
+    const raw = tenant?._raw || tenant
+    const key = [
+      (raw?.email || tenant?.email || '').trim().toLowerCase(),
+      (raw?.phone || tenant?.phone || '').trim().toLowerCase(),
+      (raw?.full_name || tenant?.name || '').trim().toLowerCase(),
+      String(raw?.property_id || tenant?.propertyId || '')
+    ].join('|')
+    if (!key || seen.has(key)) continue
+    seen.set(key, true)
+    result.push(tenant)
+  }
+  return result
+}

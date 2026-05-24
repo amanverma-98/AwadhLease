@@ -119,6 +119,23 @@ class PropertyService:
 
     async def create_property(self, payload: PropertyCreate, user: User) -> PropertyOut:
         landlord = await Landlord.find(Landlord.user_id.id == user.id).first_or_none()
+        if not landlord:
+            raise HTTPException(status_code=404, detail="Landlord profile not found")
+
+        existing = await Property.find(
+            Property.landlord_id.id == landlord.id,
+            Property.name == payload.name,
+            Property.address == payload.address,
+            Property.city == payload.city,
+            Property.locality == (payload.locality or payload.address),
+            Property.monthly_rent == payload.monthly_rent,
+        ).first_or_none()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="Property already exists for this landlord",
+            )
+
         doc = Property(**payload.model_dump(), landlord_id=landlord)
         await doc.insert()
         return self._to_out(doc)

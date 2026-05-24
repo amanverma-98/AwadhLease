@@ -5,7 +5,7 @@ import { Input } from '../../components/ui/input'
 import { TenantTable } from '../../components/TenantTable'
 import { listTenants, createTenant } from '../../services/tenantService'
 import { listProperties } from '../../services/propertyService'
-import { mapTenantFromApi } from '../../utils/tenantMapper'
+import { dedupeTenants, mapTenantFromApi } from '../../utils/tenantMapper'
 import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function TenantsPage() {
@@ -37,7 +37,9 @@ export function TenantsPage() {
       )
       setProperties(propertyData)
       setTenants(
-        tenantData.map((t) => mapTenantFromApi(t, propertyMap[t.property_id]))
+        dedupeTenants(
+          tenantData.map((t) => mapTenantFromApi(t, propertyMap[t.property_id]))
+        )
       )
     } catch (error) {
       pushToast({ title: 'Load failed', message: error.message })

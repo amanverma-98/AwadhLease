@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = Field(120, alias="RATE_LIMIT_PER_MINUTE")
     allowed_origins: str = Field(default="*", alias="ALLOWED_ORIGINS")
     allowed_origins_regex: str | None = Field(default=None, alias="ALLOWED_ORIGINS_REGEX")
+    allow_credentials: bool = Field(default=False, alias="ALLOW_CREDENTIALS")
     jwt_secret: str = Field("change-me", alias="JWT_SECRET")
     jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
     access_token_minutes: int = Field(30, alias="ACCESS_TOKEN_MINUTES")

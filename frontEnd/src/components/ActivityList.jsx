@@ -1,4 +1,11 @@
 export function ActivityList({ items }) {
+  if (!items || items.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-ink-200 bg-white/70 px-4 py-6 text-center text-sm text-ink-500">
+        No recent activity yet.
+      </div>
+    )
+  }
   return (
     <div className="space-y-3">
       {items.map((item) => (

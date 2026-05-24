@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react'
-import { LineChart, Line, ResponsiveContainer, Tooltip, AreaChart, Area } from 'recharts'
 import { KpiCard } from '../../components/KpiCard'
 import { InsightCard } from '../../components/InsightCard'
 import { ActivityList } from '../../components/ActivityList'
 import { Card } from '../../components/ui/card'
 import { useDashboardStore } from '../../store/useDashboardStore'
-import { aiInsights } from '../../data/insights'
-import { recentActivities } from '../../data/activities'
-import { revenueSeries, occupancySeries } from '../../data/analytics'
 import { getAnalytics } from '../../services/analyticsService'
 import { formatRupee } from '../../utils/format'
 
 export function LandlordDashboard() {
   const { kpis, setKpis } = useDashboardStore()
   const [liveInsight, setLiveInsight] = useState(null)
+
+  const displayedKpis = kpis.length
+    ? kpis
+    : [
+        { id: 'collected', label: 'Rent collected', value: '—' },
+        { id: 'pending', label: 'Pending rent', value: '—' },
+        { id: 'occupancy', label: 'Occupancy', value: '—' }
+      ]
 
   useEffect(() => {
     getAnalytics()
@@ -47,7 +51,7 @@ export function LandlordDashboard() {
   return (
     <div className="space-y-8 pb-20">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {kpis.map((kpi) => (
+        {displayedKpis.map((kpi) => (
           <KpiCard key={kpi.id} {...kpi} />
         ))}
       </div>
@@ -63,29 +67,12 @@ export function LandlordDashboard() {
                 Rent inflow trend
               </h2>
             </div>
-            <span className="text-xs font-semibold text-emerald-600">
-              +12% this quarter
+            <span className="text-xs font-semibold text-ink-400">
+              Waiting for historical data
             </span>
           </div>
-          <div className="mt-6 h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueSeries}>
-                <defs>
-                  <linearGradient id="revenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#6366f1"
-                  fill="url(#revenue)"
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="mt-6 flex h-52 items-center justify-center text-sm text-ink-500">
+            No trend data yet. Add payments to populate charts.
           </div>
         </Card>
         <Card className="p-6">
@@ -93,18 +80,8 @@ export function LandlordDashboard() {
             Occupancy
           </p>
           <h2 className="text-lg font-semibold text-ink-900">Active units</h2>
-          <div className="mt-6 h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={occupancySeries}>
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="mt-6 flex h-52 items-center justify-center text-sm text-ink-500">
+            No occupancy trend yet. Add properties to populate charts.
           </div>
         </Card>
       </div>
@@ -117,21 +94,23 @@ export function LandlordDashboard() {
               <InsightCard
                 insight={{
                   id: 'live',
-                  title: 'AI portfolio insight',
-                  detail: liveInsight.summary,
-                  tone: 'info'
+                  title: liveInsight.summary,
+                  confidence: 82,
+                  status: 'info'
                 }}
               />
             )}
-            {aiInsights.map((insight) => (
-              <InsightCard key={insight.id} insight={insight} />
-            ))}
+            {!liveInsight && (
+              <Card className="p-5 text-sm text-ink-500">
+                No AI insights yet. Generate analytics to see recommendations.
+              </Card>
+            )}
           </div>
         </div>
         <div>
           <h2 className="text-lg font-semibold text-ink-900">Recent activity</h2>
           <div className="mt-4">
-            <ActivityList items={recentActivities} />
+            <ActivityList items={[]} />
           </div>
         </div>
       </div>

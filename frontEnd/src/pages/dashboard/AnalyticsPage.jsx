@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ResponsiveContainer, LineChart, Line, Tooltip, BarChart, Bar } from 'recharts'
 import { Card } from '../../components/ui/card'
-import { revenueSeries, maintenanceSeries } from '../../data/analytics'
 import { getAnalytics } from '../../services/analyticsService'
 import { formatRupee } from '../../utils/format'
 
@@ -63,24 +61,14 @@ export function AnalyticsPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-ink-900">Revenue trends</h3>
-          <div className="mt-4 h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueSeries}>
-                <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#6366f1" />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="mt-4 flex h-52 items-center justify-center text-sm text-ink-500">
+            Trend data will appear once payments are recorded.
           </div>
         </Card>
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-ink-900">Maintenance trend</h3>
-          <div className="mt-4 h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={maintenanceSeries}>
-                <Tooltip />
-                <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="mt-4 flex h-52 items-center justify-center text-sm text-ink-500">
+            Trend data will appear once maintenance tickets are created.
           </div>
         </Card>
       </div>

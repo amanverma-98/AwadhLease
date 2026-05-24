@@ -101,6 +101,10 @@ export const useUserStore = create((set, get) => ({
     })
   },
 
+  setUser: (user) => {
+    get()._persist({ user })
+  },
+
   logout: () => {
     clearAuth()
     set({
@@ -110,6 +114,13 @@ export const useUserStore = create((set, get) => ({
       refreshToken: null,
       isAuthenticated: false,
       authError: null
+    })
+  },
+
+  updateUserInfo: (userInfo) => {
+    const state = get()
+    get()._persist({
+      user: { ...state.user, ...userInfo }
     })
   }
 }))

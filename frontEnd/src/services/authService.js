@@ -15,6 +15,11 @@ export async function refreshTokens(refreshToken) {
   return data
 }
 
+export async function getMe() {
+  const { data } = await apiClient.get('/auth/me')
+  return data
+}
+
 export async function detectUserRole() {
   try {
     await apiClient.get('/tenants', { params: { limit: 1 } })

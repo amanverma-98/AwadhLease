@@ -12,9 +12,7 @@ export const useChatStore = create((set) => ({
     {
       id: 'conv-1',
       title: 'May portfolio summary',
-      messages: [
-        { role: 'assistant', content: 'Your May revenue is projected at INR 5.4L.' }
-      ]
+      messages: []
     }
   ],
   activeId: 'conv-1',

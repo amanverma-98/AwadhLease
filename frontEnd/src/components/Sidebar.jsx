@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Bot,
@@ -10,6 +11,8 @@ import {
   Home
 } from 'lucide-react'
 import { useSidebarStore } from '../store/useSidebarStore'
+import { useUserStore } from '../store/useUserStore'
+import { getAnalytics } from '../services/analyticsService'
 import { cn } from '../utils/cn'
 
 const landlordLinks = [
@@ -34,7 +37,29 @@ const tenantLinks = [
 export function Sidebar({ variant = 'landlord' }) {
   const { collapsed, mobileOpen, closeMobile, toggleCollapsed } =
     useSidebarStore()
+  const { isAuthenticated, role } = useUserStore()
+  const [aiStatus, setAiStatus] = useState({ label: 'Checking', detail: '...' })
   const links = variant === 'tenant' ? tenantLinks : landlordLinks
+
+  useEffect(() => {
+    if (!isAuthenticated || role !== 'landlord') {
+      setAiStatus({ label: 'Unavailable', detail: 'Sign in as landlord' })
+      return
+    }
+    let mounted = true
+    getAnalytics()
+      .then(() => {
+        if (!mounted) return
+        setAiStatus({ label: 'Automation ready', detail: 'Live insights enabled' })
+      })
+      .catch(() => {
+        if (!mounted) return
+        setAiStatus({ label: 'Unavailable', detail: 'Analytics offline' })
+      })
+    return () => {
+      mounted = false
+    }
+  }, [isAuthenticated, role])
 
   return (
     <>
@@ -98,8 +123,8 @@ export function Sidebar({ variant = 'landlord' }) {
           <p className="text-xs uppercase tracking-[0.2em] text-white/60">
             AI Status
           </p>
-          <p className="mt-1 text-sm font-semibold">Automation active</p>
-          <p className="text-xs text-white/70">12 workflows running</p>
+          <p className="mt-1 text-sm font-semibold">{aiStatus.label}</p>
+          <p className="text-xs text-white/70">{aiStatus.detail}</p>
         </div>
       </aside>
     </>

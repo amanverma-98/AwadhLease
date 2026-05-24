@@ -9,6 +9,8 @@ export function InsightCard({ insight }) {
       : insight.status === 'warning'
         ? 'warning'
         : 'info'
+  const confidence = insight.confidence ?? null
+  const detail = insight.detail || insight.title
 
   return (
     <Card className="flex flex-col gap-3 p-5">
@@ -17,9 +19,13 @@ export function InsightCard({ insight }) {
           <Sparkles className="h-4 w-4 text-brand-500" />
           AI Insight
         </div>
-        <Badge tone={tone}>{insight.confidence}% confidence</Badge>
+        {confidence !== null ? (
+          <Badge tone={tone}>{confidence}% confidence</Badge>
+        ) : (
+          <Badge tone={tone}>Live</Badge>
+        )}
       </div>
-      <p className="text-sm text-ink-600">{insight.title}</p>
+      <p className="text-sm text-ink-600">{detail}</p>
     </Card>
   )
 }

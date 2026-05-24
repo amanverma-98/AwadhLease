@@ -15,7 +15,7 @@ export function MaintenancePage() {
       try {
         const [maintenanceData, propertyData] = await Promise.all([
           listMaintenance({ limit: 100 }),
-          listProperties({ limit: 100 })
+          listProperties({ limit: 100, mine: true })
         ])
         const propertyMap = Object.fromEntries(
           propertyData.map((p) => [p.id, p.name])

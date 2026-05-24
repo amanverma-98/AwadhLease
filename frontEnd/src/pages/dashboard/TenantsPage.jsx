@@ -30,7 +30,7 @@ export function TenantsPage() {
     try {
       const [tenantData, propertyData] = await Promise.all([
         listTenants({ limit: 100 }),
-        listProperties({ limit: 100 })
+        listProperties({ limit: 100, mine: true })
       ])
       const propertyMap = Object.fromEntries(
         propertyData.map((p) => [p.id, p.name])

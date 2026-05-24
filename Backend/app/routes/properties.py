@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.auth.dependencies import get_current_user, require_role
+from app.auth.dependencies import get_current_user, get_optional_user, require_role
 from app.middleware.rate_limit import rate_limit_dependency
 from beanie import PydanticObjectId
 
@@ -28,6 +28,7 @@ notification_service = NotificationService()
 async def list_properties(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
+    mine: bool = Query(False),
     occupancy_status: str | None = None,
     property_type: str | None = None,
     min_rent: float | None = None,
@@ -41,10 +42,23 @@ async def list_properties(
     locality: str | None = None,
     city: str | None = None,
     sort_by: str | None = Query(None, description="rent_asc|rent_desc|newest"),
+    user: User | None = Depends(get_optional_user),
 ):
+    landlord_id = None
+    if mine:
+        if not user:
+            raise HTTPException(status_code=401, detail="Authentication required")
+        if user.role != "landlord":
+            raise HTTPException(status_code=403, detail="Landlord access required")
+        landlord = await Landlord.find(Landlord.user_id.id == user.id).first_or_none()
+        if not landlord:
+            raise HTTPException(status_code=404, detail="Landlord profile not found")
+        landlord_id = str(landlord.id)
+
     items, _ = await service.list_properties(
         skip,
         limit,
+        landlord_id,
         occupancy_status,
         property_type,
         min_rent,

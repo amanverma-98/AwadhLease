@@ -5,6 +5,7 @@ from typing import List, Tuple
 import secrets
 
 from beanie import PydanticObjectId
+from bson.errors import InvalidId
 from fastapi import HTTPException
 
 from app.core.security import hash_password
@@ -53,7 +54,13 @@ class TenantService:
         return [self._to_out(item) for item in items], total
 
     async def create_tenant(self, payload: TenantCreate, user: User) -> TenantCreateResponse:
-        property_doc = await Property.get(PydanticObjectId(payload.property_id))
+        if not payload.property_id:
+            raise HTTPException(status_code=400, detail="Property ID is required")
+        try:
+            property_id = PydanticObjectId(payload.property_id)
+        except InvalidId as exc:
+            raise HTTPException(status_code=400, detail="Invalid property ID") from exc
+        property_doc = await Property.get(property_id)
         if not property_doc:
             raise HTTPException(status_code=404, detail="Property not found")
 

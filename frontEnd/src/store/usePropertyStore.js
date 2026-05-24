@@ -3,6 +3,7 @@ import { properties as mockProperties } from '../data/properties'
 import { listProperties } from '../services/propertyService'
 import {
   buildPropertyQueryParams,
+  dedupeProperties,
   mapPropertyFromApi
 } from '../utils/propertyMapper'
 
@@ -18,7 +19,7 @@ export const usePropertyStore = create((set, get) => ({
     set({ isLoading: true, loadError: null })
     try {
       const data = await listProperties(buildPropertyQueryParams(activeFilters))
-      const mapped = data.map(mapPropertyFromApi)
+      const mapped = dedupeProperties(data.map(mapPropertyFromApi))
       set({
         listings: mapped.length ? mapped : [],
         isLoading: false,

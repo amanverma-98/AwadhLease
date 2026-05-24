@@ -102,6 +102,25 @@ export function buildPropertyQueryParams(filters = {}) {
   return params
 }
 
+export function dedupeProperties(properties = []) {
+  const seen = new Map()
+  const result = []
+  for (const property of properties) {
+    const raw = property?._raw || property
+    const key = [
+      (raw?.name || property?.title || '').trim().toLowerCase(),
+      (raw?.address || property?.address || '').trim().toLowerCase(),
+      (raw?.city || '').trim().toLowerCase(),
+      (raw?.locality || '').trim().toLowerCase(),
+      String(raw?.monthly_rent ?? property?.rent ?? '')
+    ].join('|')
+    if (!key || seen.has(key)) continue
+    seen.set(key, true)
+    result.push(property)
+  }
+  return result
+}
+
 const splitList = (value, delimiterRegex) =>
   value
     ? value

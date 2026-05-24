@@ -8,7 +8,11 @@ import { Textarea } from '../../components/ui/textarea'
 import { formatRupee } from '../../utils/format'
 import { listProperties, createProperty } from '../../services/propertyService'
 import { uploadImage } from '../../services/uploadService'
-import { mapPropertyFromApi, mapPropertyToCreatePayload } from '../../utils/propertyMapper'
+import {
+  dedupeProperties,
+  mapPropertyFromApi,
+  mapPropertyToCreatePayload
+} from '../../utils/propertyMapper'
 import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function PropertiesPage() {
@@ -44,7 +48,7 @@ export function PropertiesPage() {
     setLoading(true)
     try {
       const data = await listProperties({ limit: 100 })
-      setProperties(data.map(mapPropertyFromApi))
+      setProperties(dedupeProperties(data.map(mapPropertyFromApi)))
     } catch (error) {
       pushToast({ title: 'Load failed', message: error.message })
     } finally {

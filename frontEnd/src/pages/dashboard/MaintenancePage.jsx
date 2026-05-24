@@ -54,7 +54,10 @@ export function MaintenancePage() {
             <MaintenanceCard key={ticket.id} ticket={ticket} />
           ))}
           {!tickets.length && (
-            <p className="text-sm text-ink-500">No maintenance tickets yet.</p>
+            <p className="text-sm text-ink-500">
+              No maintenance tickets yet. Tenants can raise complaints from their
+              Maintenance page once they are onboarded.
+            </p>
           )}
         </div>
         <Card className="p-6">

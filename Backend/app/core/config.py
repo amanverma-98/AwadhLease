@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     api_prefix: str = "/"
     mongodb_uri: str = Field(..., alias="MONGODB_URI")
     mongodb_db: str = Field("rentpilot", alias="MONGODB_DB")
+    groq_api_key: str | None = Field(None, alias="GROQ_API_KEY")
+    groq_model: str = Field("llama-3.1-8b-instant", alias="GROQ_MODEL")
+    prefer_groq: bool = Field(default=True, alias="PREFER_GROQ")
     gemini_api_key: str | None = Field(None, alias="GEMINI_API_KEY")
     gemini_model: str = Field("gemini-1.5-flash-latest", alias="GEMINI_MODEL")
     system_prompt: str = Field(

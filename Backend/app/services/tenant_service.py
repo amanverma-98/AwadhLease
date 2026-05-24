@@ -16,6 +16,19 @@ from app.schemas.tenant import TenantCreate, TenantCreateResponse, TenantOut, Te
 
 
 class TenantService:
+    @staticmethod
+    def _extract_link_id(value: object) -> str | None:
+        if value is None:
+            return None
+        if isinstance(value, PydanticObjectId):
+            return str(value)
+        if isinstance(value, str):
+            return value
+        link_id = getattr(value, "id", None)
+        if link_id is None:
+            return None
+        return str(link_id)
+
     async def list_tenants(
         self,
         user: User,
@@ -105,8 +118,8 @@ class TenantService:
     def _to_out(doc: Tenant) -> TenantOut:
         return TenantOut(
             id=str(doc.id),
-            property_id=str(doc.property_id.id) if doc.property_id else "",
-            landlord_id=str(doc.landlord_id.id) if doc.landlord_id else None,
+            property_id=TenantService._extract_link_id(doc.property_id) or "",
+            landlord_id=TenantService._extract_link_id(doc.landlord_id),
             full_name=doc.full_name,
             phone=doc.phone,
             email=doc.email,

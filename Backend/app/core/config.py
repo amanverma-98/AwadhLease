@@ -57,13 +57,17 @@ class Settings(BaseSettings):
                 parsed = json.loads(raw)
                 if isinstance(parsed, list):
                     return [
-                        str(item).strip().rstrip("/")
+                        str(item).strip().strip('"').strip("'").rstrip("/")
                         for item in parsed
                         if str(item).strip()
                     ]
             except json.JSONDecodeError:
                 pass
-        return [item.strip().rstrip("/") for item in raw.split(",") if item.strip()]
+        return [
+            item.strip().strip('"').strip("'").rstrip("/")
+            for item in raw.split(",")
+            if item.strip()
+        ]
 
 
 @lru_cache

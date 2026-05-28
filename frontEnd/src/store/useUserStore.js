@@ -1,0 +1,149 @@
+import { create } from 'zustand'
+import { clearAuth, loadAuth, saveAuth } from '../utils/authStorage'
+import * as authApi from '../services/authService'
+
+export const useUserStore = create((set, get) => ({
+  user: null,
+  role: null,
+  accessToken: null,
+  refreshToken: null,
+  isAuthenticated: false,
+  isLoading: false,
+  authError: null,
+
+  hydrate: () => {
+    const saved = loadAuth()
+    if (!saved?.accessToken) return
+    set({
+      user: saved.user || null,
+      role: saved.role || null,
+      accessToken: saved.accessToken,
+      refreshToken: saved.refreshToken,
+      isAuthenticated: true
+    })
+  },
+
+  refreshProfile: async () => {
+    try {
+      const profile = await authApi.getMe()
+      const user = {
+        email: profile.email,
+        name: profile.full_name || profile.email
+      }
+      get()._persist({ user, role: profile.role })
+    } catch {
+      /* ignore */
+    }
+  },
+
+  _persist: (partial) => {
+    const state = { ...get(), ...partial }
+    saveAuth({
+      user: state.user,
+      role: state.role,
+      accessToken: state.accessToken,
+      refreshToken: state.refreshToken
+    })
+    set(partial)
+  },
+
+  loginWithCredentials: async (email, password) => {
+    set({ isLoading: true, authError: null })
+    try {
+      const tokens = await authApi.login(email, password)
+      set({
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        isAuthenticated: true
+      })
+      saveAuth({
+        user: { email },
+        role: null,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token
+      })
+      let role = null
+      let user = { email }
+      try {
+        const profile = await authApi.getMe()
+        role = profile.role
+        user = {
+          email: profile.email || email,
+          name: profile.full_name || profile.email || email
+        }
+      } catch {
+        role = await authApi.detectUserRole()
+        user = { email, name: role === 'tenant' ? 'Tenant' : 'Landlord' }
+      }
+      get()._persist({
+        user,
+        role,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        isAuthenticated: true,
+        isLoading: false,
+        authError: null
+      })
+      return role
+    } catch (error) {
+      set({ isLoading: false, authError: error.message })
+      throw error
+    }
+  },
+
+  registerLandlord: async (payload) => {
+    set({ isLoading: true, authError: null })
+    try {
+      const tokens = await authApi.registerLandlord(payload)
+      const user = {
+        name: payload.full_name,
+        email: payload.email
+      }
+      get()._persist({
+        user,
+        role: 'landlord',
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        isAuthenticated: true,
+        isLoading: false,
+        authError: null
+      })
+    } catch (error) {
+      set({ isLoading: false, authError: error.message })
+      throw error
+    }
+  },
+
+  login: ({ name, email, role }) => {
+    get()._persist({
+      user: { name, email },
+      role,
+      accessToken: get().accessToken,
+      refreshToken: get().refreshToken,
+      isAuthenticated: true
+    })
+  },
+
+  setUser: (user) => {
+    get()._persist({ user })
+  },
+
+  logout: () => {
+    clearAuth()
+    set({
+      user: null,
+      role: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
+      authError: null
+    })
+  },
+
+  updateUserInfo: (userInfo) => {
+    const state = get()
+    get()._persist({
+      user: { ...state.user, ...userInfo }
+    })
+  }
+}))

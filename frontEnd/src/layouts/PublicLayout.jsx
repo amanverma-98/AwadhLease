@@ -1,7 +1,11 @@
+import { useState } from 'react'
 import { Outlet, Link } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 import { cn } from '../utils/cn'
 
 export function PublicLayout() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-ink-50">
       <div className="noise-bg">
@@ -35,7 +39,49 @@ export function PublicLayout() {
               Register
             </Link>
           </div>
+          <button
+            className="inline-flex items-center justify-center rounded-2xl border border-ink-100 bg-white/80 p-2 text-ink-700 shadow-soft transition hover:bg-white md:hidden"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+            aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="public-mobile-menu"
+            type="button"
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
         </nav>
+        <div
+          id="public-mobile-menu"
+          className={cn(
+            'mx-auto w-full max-w-6xl px-6 md:hidden',
+            isMobileMenuOpen ? 'pb-6' : 'hidden'
+          )}
+        >
+          <div className="flex flex-col gap-3 rounded-3xl border border-ink-100 bg-white/90 p-4 shadow-soft">
+            <Link
+              to="/auth/login"
+              className={cn(
+                'inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold text-ink-700 transition hover:bg-ink-100'
+              )}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Login
+            </Link>
+            <Link
+              to="/auth/register"
+              className={cn(
+                'inline-flex items-center justify-center rounded-2xl border border-ink-100 bg-white px-4 py-2 text-sm font-semibold text-ink-900 shadow-soft transition hover:bg-white'
+              )}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Register
+            </Link>
+          </div>
+        </div>
       </div>
       <Outlet />
       <footer className="mt-20 border-t border-ink-100 bg-white/70 px-6 py-10">

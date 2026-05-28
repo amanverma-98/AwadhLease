@@ -23,6 +23,19 @@ export const useUserStore = create((set, get) => ({
     })
   },
 
+  refreshProfile: async () => {
+    try {
+      const profile = await authApi.getMe()
+      const user = {
+        email: profile.email,
+        name: profile.full_name || profile.email
+      }
+      get()._persist({ user, role: profile.role })
+    } catch {
+      /* ignore */
+    }
+  },
+
   _persist: (partial) => {
     const state = { ...get(), ...partial }
     saveAuth({
@@ -49,9 +62,19 @@ export const useUserStore = create((set, get) => ({
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token
       })
-
-      const role = await authApi.detectUserRole()
-      const user = { email, name: role === 'tenant' ? 'Tenant' : 'Landlord' }
+      let role = null
+      let user = { email }
+      try {
+        const profile = await authApi.getMe()
+        role = profile.role
+        user = {
+          email: profile.email || email,
+          name: profile.full_name || profile.email || email
+        }
+      } catch {
+        role = await authApi.detectUserRole()
+        user = { email, name: role === 'tenant' ? 'Tenant' : 'Landlord' }
+      }
       get()._persist({
         user,
         role,

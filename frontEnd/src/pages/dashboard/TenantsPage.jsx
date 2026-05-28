@@ -7,6 +7,7 @@ import { listTenants, createTenant } from '../../services/tenantService'
 import { listProperties } from '../../services/propertyService'
 import { dedupeTenants, mapTenantFromApi } from '../../utils/tenantMapper'
 import { useNotificationStore } from '../../store/useNotificationStore'
+import { broadcastNotification } from '../../services/notificationService'
 
 export function TenantsPage() {
   const { pushToast } = useNotificationStore()
@@ -14,6 +15,11 @@ export function TenantsPage() {
   const [tenants, setTenants] = useState([])
   const [properties, setProperties] = useState([])
   const [credentials, setCredentials] = useState(null)
+  const [alertForm, setAlertForm] = useState({
+    title: '',
+    message: '',
+    propertyId: ''
+  })
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -78,6 +84,24 @@ export function TenantsPage() {
     }
   }
 
+  const handleBroadcast = async () => {
+    if (!alertForm.title || !alertForm.message) {
+      pushToast({ title: 'Missing fields', message: 'Add a title and message.' })
+      return
+    }
+    try {
+      await broadcastNotification({
+        title: alertForm.title,
+        message: alertForm.message,
+        property_id: alertForm.propertyId || null
+      })
+      pushToast({ title: 'Alert sent', message: 'Tenants received the notification.' })
+      setAlertForm({ title: '', message: '', propertyId: '' })
+    } catch (error) {
+      pushToast({ title: 'Send failed', message: error.message })
+    }
+  }
+
   return (
     <div className="space-y-6 pb-20">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -97,6 +121,43 @@ export function TenantsPage() {
           <p>Temporary password: {credentials.password}</p>
         </Card>
       )}
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-ink-900">Send tenant alert</h3>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <Input
+            placeholder="Alert title"
+            value={alertForm.title}
+            onChange={(event) =>
+              setAlertForm((prev) => ({ ...prev, title: event.target.value }))
+            }
+          />
+          <select
+            className="rounded-2xl border border-ink-100 bg-white px-4 py-3 text-sm"
+            value={alertForm.propertyId}
+            onChange={(event) =>
+              setAlertForm((prev) => ({ ...prev, propertyId: event.target.value }))
+            }
+          >
+            <option value="">All properties</option>
+            {properties.map((property) => (
+              <option key={property.id} value={property.id}>
+                {property.name}
+              </option>
+            ))}
+          </select>
+          <Input
+            placeholder="Message for tenants"
+            value={alertForm.message}
+            onChange={(event) =>
+              setAlertForm((prev) => ({ ...prev, message: event.target.value }))
+            }
+          />
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Button onClick={handleBroadcast}>Send alert</Button>
+        </div>
+      </Card>
 
       <TenantTable items={tenants} />
 

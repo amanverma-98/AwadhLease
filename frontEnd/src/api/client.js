@@ -60,7 +60,10 @@ apiClient.interceptors.response.use(
       }
     }
 
-    return Promise.reject(new Error(getApiErrorMessage(error)))
+    const wrappedError = new Error(getApiErrorMessage(error))
+    wrappedError.response = error?.response
+    wrappedError.status = error?.response?.status
+    return Promise.reject(wrappedError)
   }
 )
 

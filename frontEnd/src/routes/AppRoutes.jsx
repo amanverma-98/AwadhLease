@@ -16,10 +16,12 @@ import { AnalyticsPage } from '../pages/dashboard/AnalyticsPage'
 import { SettingsPage } from '../pages/dashboard/SettingsPage'
 import { TenantDashboard } from '../pages/tenant/TenantDashboard'
 import { TenantPayments } from '../pages/tenant/TenantPayments'
+import { TenantPaymentGateway } from '../pages/tenant/TenantPaymentGateway'
 import { TenantMaintenance } from '../pages/tenant/TenantMaintenance'
 import { TenantLease } from '../pages/tenant/TenantLease'
 import { TenantProfile } from '../pages/tenant/TenantProfile'
 import { TenantNotifications } from '../pages/tenant/TenantNotifications'
+import { TenantAssistant } from '../pages/tenant/TenantAssistant'
 import { NotFound } from '../pages/NotFound'
 import { useUserStore } from '../store/useUserStore'
 
@@ -79,10 +81,12 @@ export function AppRoutes() {
       >
         <Route path="/tenant/dashboard" element={<TenantDashboard />} />
         <Route path="/tenant/payments" element={<TenantPayments />} />
+        <Route path="/tenant/payments/checkout" element={<TenantPaymentGateway />} />
         <Route path="/tenant/maintenance" element={<TenantMaintenance />} />
         <Route path="/tenant/lease" element={<TenantLease />} />
         <Route path="/tenant/profile" element={<TenantProfile />} />
         <Route path="/tenant/notifications" element={<TenantNotifications />} />
+        <Route path="/tenant/assistant" element={<TenantAssistant />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

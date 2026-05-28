@@ -53,6 +53,8 @@ class Settings(BaseSettings):
 
     def get_allowed_origins(self) -> List[str]:
         raw = (self.allowed_origins or "*").strip()
+        if not raw:
+            return ["*"]
         if raw == "*":
             return ["*"]
         if raw.startswith("["):

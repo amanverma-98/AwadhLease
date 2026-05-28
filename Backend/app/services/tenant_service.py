@@ -85,6 +85,13 @@ class TenantService:
                 detail="Tenant already exists for this property and contact info",
             )
 
+        existing_user = await User.find(User.email == payload.email).first_or_none()
+        if existing_user:
+            raise HTTPException(
+                status_code=409,
+                detail="User email already exists. Use a different email for tenant.",
+            )
+
         temp_password = secrets.token_urlsafe(8)
         user = User(
             full_name=payload.full_name,

@@ -15,6 +15,7 @@ class Payment(Document):
     amount: float
     payment_date: datetime
     payment_status: str
+    transaction_id: str | None = None
 
     class Settings:
         name = "payments"

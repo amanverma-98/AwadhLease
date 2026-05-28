@@ -13,7 +13,7 @@ const tenantItems = [
   { label: 'Home', to: '/tenant/dashboard', icon: Home },
   { label: 'Payments', to: '/tenant/payments', icon: Building2 },
   { label: 'Maintenance', to: '/tenant/maintenance', icon: Wrench },
-  { label: 'AI', to: '/assistant', icon: Bot }
+  { label: 'AI', to: '/tenant/assistant', icon: Bot }
 ]
 
 export function MobileBottomNav({ variant = 'landlord' }) {

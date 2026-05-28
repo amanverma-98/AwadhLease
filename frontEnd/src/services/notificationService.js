@@ -9,3 +9,8 @@ export async function markNotificationRead(notificationId) {
   const { data } = await apiClient.post(`/notifications/${notificationId}/read`)
   return data
 }
+
+export async function broadcastNotification(payload) {
+  const { data } = await apiClient.post('/notifications/broadcast', payload)
+  return data
+}

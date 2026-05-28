@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import secrets
 from typing import List
 
 from beanie import PydanticObjectId
@@ -64,6 +65,7 @@ class PaymentService:
             amount=payload.amount,
             payment_date=payload.payment_date,
             payment_status=payload.payment_status,
+            transaction_id=payload.transaction_id,
         )
         await doc.insert()
         return PaymentOut.model_validate(doc)
@@ -79,12 +81,14 @@ class PaymentService:
         if not property_doc:
             raise HTTPException(status_code=404, detail="Property not found")
 
+        transaction_id = payload.transaction_id or f"TXN-{secrets.token_hex(6)}"
         doc = Payment(
             tenant_id=tenant_doc,
             property_id=property_doc,
             amount=payload.amount,
             payment_date=payload.payment_date or datetime.utcnow(),
             payment_status=payload.payment_status,
+            transaction_id=transaction_id,
         )
         await doc.insert()
         return PaymentOut.model_validate(doc)

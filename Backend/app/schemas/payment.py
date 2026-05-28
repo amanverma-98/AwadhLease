@@ -13,12 +13,14 @@ class PaymentCreate(BaseModel):
     amount: float
     payment_date: datetime
     payment_status: str
+    transaction_id: str | None = None
 
 
 class TenantPaymentCreate(BaseModel):
     amount: float
     payment_date: datetime | None = None
     payment_status: str = "paid"
+    transaction_id: str | None = None
 
 
 class PaymentOut(DocumentOut):
@@ -27,6 +29,7 @@ class PaymentOut(DocumentOut):
     amount: float
     payment_date: datetime
     payment_status: str
+    transaction_id: str | None = None
 
     @field_serializer("tenant_id", "property_id")
     def serialize_ids(self, value):

@@ -1,20 +1,14 @@
+import { useNavigate } from 'react-router-dom'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
 import { formatRupee } from '../../utils/format'
-import { createTenantPayment } from '../../services/paymentService'
-import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function TenantDashboard() {
-  const { pushToast } = useNotificationStore()
+  const navigate = useNavigate()
 
   const handlePayNow = async () => {
-    try {
-      await createTenantPayment({ amount: 18000, payment_status: 'paid' })
-      pushToast({ title: 'Payment recorded', message: 'Your rent payment was saved.' })
-    } catch (error) {
-      pushToast({ title: 'Payment failed', message: error.message })
-    }
+    navigate('/tenant/payments/checkout')
   }
 
   return (

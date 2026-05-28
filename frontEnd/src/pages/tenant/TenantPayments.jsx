@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { formatRupee } from '../../utils/format'
-import { createTenantPayment, listPayments } from '../../services/paymentService'
-import { useNotificationStore } from '../../store/useNotificationStore'
+import { listPayments } from '../../services/paymentService'
 
 export function TenantPayments() {
-  const { pushToast } = useNotificationStore()
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     listPayments({ limit: 50 })
@@ -18,21 +17,8 @@ export function TenantPayments() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handlePay = async () => {
-    setSubmitting(true)
-    try {
-      await createTenantPayment({
-        amount: 18000,
-        payment_status: 'paid'
-      })
-      pushToast({ title: 'Payment recorded', message: 'Your rent payment was saved.' })
-      const data = await listPayments({ limit: 50 })
-      setItems(data)
-    } catch (error) {
-      pushToast({ title: 'Payment failed', message: error.message })
-    } finally {
-      setSubmitting(false)
-    }
+  const handlePay = () => {
+    navigate('/tenant/payments/checkout')
   }
 
   const handleReceipt = (payment) => {
@@ -42,6 +28,7 @@ export function TenantPayments() {
       `Date: ${dateLabel}`,
       `Amount: ${formatRupee(payment.amount)}`,
       `Status: ${payment.payment_status}`,
+      `Transaction ID: ${payment.transaction_id || 'N/A'}`,
       `Property ID: ${payment.property_id}`,
       `Tenant ID: ${payment.tenant_id}`
     ].join('\n')
@@ -67,8 +54,8 @@ export function TenantPayments() {
               {formatRupee(18000)} due in 5 days
             </p>
           </div>
-          <Button onClick={handlePay} disabled={submitting}>
-            {submitting ? 'Processing...' : 'Pay rent'}
+          <Button onClick={handlePay}>
+            Pay rent
           </Button>
         </div>
       </Card>
@@ -90,9 +77,12 @@ export function TenantPayments() {
                     year: 'numeric'
                   })}
                 </p>
-                <p className="text-xs text-ink-400">
-                  {payment.payment_status}
-                </p>
+                <p className="text-xs text-ink-400">{payment.payment_status}</p>
+                {payment.transaction_id && (
+                  <p className="text-[11px] text-ink-400">
+                    {payment.transaction_id}
+                  </p>
+                )}
               </div>
               <div className="text-right">
                 <p className="font-semibold text-ink-800">

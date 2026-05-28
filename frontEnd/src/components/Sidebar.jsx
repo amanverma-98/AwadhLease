@@ -119,12 +119,33 @@ export function Sidebar({ variant = 'landlord' }) {
           ))}
         </nav>
 
-        <div className="mt-auto rounded-2xl bg-gradient-to-br from-ink-900 to-brand-600 px-4 py-4 text-white shadow-glow">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/60">
-            AI Status
-          </p>
-          <p className="mt-1 text-sm font-semibold">{aiStatus.label}</p>
-          <p className="text-xs text-white/70">{aiStatus.detail}</p>
+        <div
+          className={cn(
+            'mt-8 rounded-2xl bg-gradient-to-br from-ink-900 to-brand-600 text-white shadow-glow transition-all',
+            collapsed ? 'px-2 py-3 text-center' : 'px-4 py-4'
+          )}
+        >
+          <div
+            className={cn(
+              'flex items-center gap-2',
+              collapsed ? 'justify-center' : 'justify-between'
+            )}
+          >
+            {!collapsed && (
+              <p className="text-xs uppercase tracking-[0.2em] text-white/60">
+                AI Status
+              </p>
+            )}
+            <div className="rounded-full bg-white/10 p-2">
+              <Bot className="h-4 w-4 text-white" />
+            </div>
+          </div>
+          {!collapsed && (
+            <>
+              <p className="mt-2 text-sm font-semibold">{aiStatus.label}</p>
+              <p className="text-xs text-white/70">{aiStatus.detail}</p>
+            </>
+          )}
         </div>
       </aside>
     </>

@@ -47,7 +47,7 @@ export function PropertiesPage() {
   const loadProperties = async () => {
     setLoading(true)
     try {
-      const data = await listProperties({ limit: 100 })
+      const data = await listProperties({ limit: 100, mine: true })
       setProperties(dedupeProperties(data.map(mapPropertyFromApi)))
     } catch (error) {
       pushToast({ title: 'Load failed', message: error.message })

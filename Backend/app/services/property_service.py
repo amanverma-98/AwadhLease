@@ -59,6 +59,7 @@ class PropertyService:
         self,
         skip: int,
         limit: int,
+        landlord_id: str | None,
         occupancy_status: str | None,
         property_type: str | None,
         min_rent: float | None,
@@ -74,6 +75,8 @@ class PropertyService:
         sort_by: str | None,
     ) -> Tuple[List[PropertyOut], int]:
         filters = []
+        if landlord_id:
+            filters.append(Property.landlord_id.id == PydanticObjectId(landlord_id))
         if occupancy_status:
             filters.append(Property.occupancy_status == occupancy_status)
         if property_type:

@@ -310,7 +310,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto mt-16 max-w-6xl">
+      <section id="marketplace" className="mx-auto mt-16 max-w-6xl">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-ink-400">
@@ -330,7 +330,15 @@ export function LandingPage() {
               </p>
             )}
           </div>
-          <Button variant="secondary" onClick={() => navigate('/properties')}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              document.getElementById('marketplace')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              })
+            }}
+          >
             View all
           </Button>
         </div>

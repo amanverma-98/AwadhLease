@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Awadhlease</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb; color: #1f2937;">
+    <div style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        <div style="background-color: #4f46e5; padding: 32px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.025em;">Welcome to Awadhlease</h1>
+        </div>
+        <div style="padding: 32px; line-height: 1.6;">
+            <p style="margin-top: 0; font-size: 16px;">Hello,</p>
+            <p style="font-size: 16px;">Your tenant account has been successfully created. You can now log into your dashboard using the temporary credentials provided below:</p>
+            <div style="background-color: #f3f4f6; border-left: 4px solid #4f46e5; padding: 20px; margin: 24px 0; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0 0 8px 0; font-size: 14px; color: #4b5563;"><strong>Email/Username:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-family: monospace;">{{ tenant_email }}</code></p>
+                <p style="margin: 0; font-size: 14px; color: #4b5563;"><strong>Temporary Password:</strong> <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-family: monospace;">{{ temporary_password }}</code></p>
+            </div>
+            <p style="font-size: 14px; color: #4b5563;">Portal login: <a href="{{ portal_url }}" style="color: #4f46e5; text-decoration: none;">{{ portal_url }}</a></p>
+        </div>
+        <div style="background-color: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af;">
+            <p style="margin: 0;">This is an automated email, please do not reply directly to this message.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -38,8 +38,8 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
-    apply_cors(app, settings)
     app.add_middleware(RequestLoggingMiddleware)
+    apply_cors(app, settings)
 
     app.include_router(health_router)
     app.include_router(auth_router)

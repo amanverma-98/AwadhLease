@@ -52,3 +52,4 @@ class TenantOut(DocumentOut):
 class TenantCreateResponse(BaseModel):
     tenant: TenantOut
     username: str
+    temporary_password: str

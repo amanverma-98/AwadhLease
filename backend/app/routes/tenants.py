@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import APIRouter, Depends, Query
 
-from app.auth.dependencies import require_role
+from app.auth.dependencies import get_current_user, require_role
 from app.middleware.rate_limit import rate_limit_dependency
+from app.models.user import User
 from app.schemas.tenant import TenantCreate, TenantCreateResponse, TenantOut, TenantUpdate
-from app.services.email_service import send_welcome_email
 from app.services.tenant_service import TenantService
 
 router = APIRouter(
@@ -21,16 +21,15 @@ async def list_tenants(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     property_id: str | None = None,
+    user: User = Depends(get_current_user),
 ):
-    items, _ = await service.list_tenants(skip, limit, property_id)
+    items, _ = await service.list_tenants(user, skip, limit, property_id)
     return items
 
 
 @router.post("", response_model=TenantCreateResponse, dependencies=[Depends(require_role("landlord"))])
-async def create_tenant(payload: TenantCreate, background_tasks: BackgroundTasks):
-    response, temp_password = await service.create_tenant(payload)
-    await send_welcome_email(response.username, temp_password, background_tasks)
-    return response
+async def create_tenant(payload: TenantCreate, user: User = Depends(get_current_user)):
+    return await service.create_tenant(payload, user)
 
 
 @router.put(

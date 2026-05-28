@@ -3,29 +3,21 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
+import bcrypt
 import jwt
-from passlib.context import CryptContext
 
 from app.core.config import get_settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-MAX_BCRYPT_PASSWORD_BYTES = 72
-
-
-def _password_too_long(password: str) -> bool:
-    return len(password.encode("utf-8")) > MAX_BCRYPT_PASSWORD_BYTES
-
 
 def hash_password(password: str) -> str:
-    if _password_too_long(password):
-        raise ValueError("Password must be 72 bytes or fewer")
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    if _password_too_long(plain_password):
-        return False
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"),
+        hashed_password.encode("utf-8"),
+    )
 
 
 def create_access_token(subject: str, extra: Dict[str, Any] | None = None) -> str:

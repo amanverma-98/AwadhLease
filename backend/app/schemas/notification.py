@@ -21,3 +21,9 @@ class NotificationOut(DocumentOut):
     @field_serializer("user_id")
     def serialize_user_id(self, value):
         return "" if value is None else str(value)
+
+
+class NotificationBroadcastRequest(BaseModel):
+    title: str
+    message: str
+    property_id: str | None = None

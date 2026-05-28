@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
+from beanie import PydanticObjectId
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class APIModel(BaseModel):
@@ -8,12 +9,7 @@ class APIModel(BaseModel):
 
 
 class DocumentOut(APIModel):
-    id: str
-
-    @field_validator("id", mode="before")
-    @classmethod
-    def coerce_id(cls, value):
-        return "" if value is None else str(value)
+    id: str | PydanticObjectId
 
     @field_serializer("id")
     def serialize_id(self, value):

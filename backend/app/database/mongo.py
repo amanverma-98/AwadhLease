@@ -38,8 +38,7 @@ def get_client() -> AsyncIOMotorClient:
 
 async def init_db(settings: Settings) -> None:
     global _client
-    import certifi
-    _client = AsyncIOMotorClient(settings.mongodb_uri, tlsCAFile=certifi.where())
+    _client = AsyncIOMotorClient(settings.mongodb_uri)
     database = _client[settings.mongodb_db]
     await init_beanie(
         database=database,

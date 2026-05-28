@@ -9,8 +9,8 @@ from app.schemas.base import DocumentOut
 
 
 class MaintenanceCreate(BaseModel):
-    property_id: str
-    tenant_id: str
+    property_id: str | None = None
+    tenant_id: str | None = None
     issue: str
     issue_images: List[str] = []
 

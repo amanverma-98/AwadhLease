@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.auth.dependencies import get_current_user
 from app.middleware.rate_limit import rate_limit_dependency
+from app.models.user import User
 from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut
 from app.services.maintenance_service import MaintenanceService
 
@@ -21,11 +22,15 @@ async def list_maintenance(
     limit: int = Query(50, ge=1, le=200),
     priority: str | None = None,
     status: str | None = None,
+    user: User = Depends(get_current_user),
 ):
-    items, _ = await service.list_tickets(skip, limit, priority, status)
+    items, _ = await service.list_tickets(user, skip, limit, priority, status)
     return items
 
 
 @router.post("", response_model=MaintenanceOut)
-async def create_maintenance(payload: MaintenanceCreate):
-    return await service.create_ticket(payload)
+async def create_maintenance(
+    payload: MaintenanceCreate,
+    user: User = Depends(get_current_user),
+):
+    return await service.create_ticket(payload, user)

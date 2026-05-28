@@ -3,35 +3,48 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Dict, Optional
 
-from google import genai
+import google.generativeai as genai
+from google.api_core.exceptions import NotFound
 
 from app.core.config import Settings
 from app.services.ai.base import AIClient
 from app.utils.json_utils import extract_json
 
 
-def _extract_text(response: Any) -> str:
-    if getattr(response, "text", None):
-        return response.text
-    try:
-        return response.candidates[0].content.parts[0].text
-    except Exception:
-        return ""
-
-
 class GeminiClient(AIClient):
     def __init__(self, settings: Settings) -> None:
-        self._client = genai.Client(api_key=settings.gemini_api_key)
-        self._model = settings.gemini_model
+        genai.configure(api_key=settings.gemini_api_key)
+        self._model_name = settings.gemini_model
+        self._model = genai.GenerativeModel(self._model_name)
+        self._fallback_models = [
+            "gemini-1.5-flash-002",
+            "gemini-1.5-pro-002",
+            "gemini-1.0-pro",
+        ]
+
+    def _swap_model(self, model_name: str) -> None:
+        self._model_name = model_name
+        self._model = genai.GenerativeModel(model_name)
 
     async def generate_text(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         full_prompt = prompt if system_prompt is None else f"{system_prompt}\n\n{prompt}"
-        response = await asyncio.to_thread(
-            self._client.models.generate_content,
-            model=self._model,
-            contents=full_prompt,
-        )
-        return _extract_text(response)
+        try:
+            response = await asyncio.to_thread(self._model.generate_content, full_prompt)
+            return response.text or ""
+        except NotFound:
+            for fallback in self._fallback_models:
+                if fallback == self._model_name:
+                    continue
+                self._swap_model(fallback)
+                try:
+                    response = await asyncio.to_thread(
+                        self._model.generate_content,
+                        full_prompt,
+                    )
+                    return response.text or ""
+                except NotFound:
+                    continue
+            raise
 
     async def generate_json(
         self, prompt: str, system_prompt: Optional[str] = None

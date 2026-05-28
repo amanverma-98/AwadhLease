@@ -10,12 +10,25 @@ from app.services.ai.noop_client import NoopAIClient
 @lru_cache
 def get_ai_client() -> AIClient:
     settings = get_settings()
-    if not settings.gemini_api_key:
-        return NoopAIClient()
+    if settings.groq_api_key and settings.prefer_groq:
+        try:
+            from app.services.ai.groq_client import GroqClient
+        except ImportError:
+            return NoopAIClient()
+        return GroqClient(settings)
 
-    try:
-        from app.services.ai.gemini_client import GeminiClient
-    except ImportError:
-        return NoopAIClient()
+    if settings.gemini_api_key:
+        try:
+            from app.services.ai.gemini_client import GeminiClient
+        except ImportError:
+            return NoopAIClient()
+        return GeminiClient(settings)
 
-    return GeminiClient(settings)
+    if settings.groq_api_key:
+        try:
+            from app.services.ai.groq_client import GroqClient
+        except ImportError:
+            return NoopAIClient()
+        return GroqClient(settings)
+
+    return NoopAIClient()

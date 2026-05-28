@@ -24,6 +24,8 @@ pip install -r requirements.txt
 Copy .env.example to .env and update values.
 ```
 
+Cloudinary is required for image uploads. Provide either `CLOUDINARY_URL` or the key/name/secret trio.
+
 3. Run the API:
 
 ```bash
@@ -47,6 +49,7 @@ docker run --env-file .env -p 8000:8000 rentpilot-ai
 - `POST /auth/register`
 - `POST /auth/login`
 - `POST /auth/refresh`
+- `GET /auth/me` (current user profile, role, tenant/property IDs)
 - `GET /properties` (marketplace search + filters)
 - `GET /properties/{id}`
 - `POST /maintenance`

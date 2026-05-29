@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
 import { useChatStore } from '../../store/useChatStore'
 import { sendChatMessage } from '../../services/chatService'
+import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function AssistantPage() {
   const {
@@ -16,6 +17,7 @@ export function AssistantPage() {
     setTyping,
     setConversationBackendId
   } = useChatStore()
+  const { pushToast } = useNotificationStore()
   const [message, setMessage] = useState('')
 
   const activeConversation = useMemo(
@@ -26,7 +28,7 @@ export function AssistantPage() {
   const conversationId = activeConversation?.backendId || null
 
   const handleSend = async () => {
-    if (!message.trim()) return
+    if (!message.trim() || typing) return
     const outgoing = message
     addMessage({ role: 'user', content: outgoing })
     setMessage('')
@@ -37,11 +39,13 @@ export function AssistantPage() {
         setConversationBackendId(result.conversation_id)
       }
       addMessage({ role: 'assistant', content: result.response })
+      pushToast({ title: 'Response received', message: 'AwadhLease replied.' })
     } catch (error) {
       addMessage({
         role: 'assistant',
         content: 'AI service is offline. Showing cached insights instead.'
       })
+      pushToast({ title: 'Message failed', message: error.message })
     } finally {
       setTyping(false)
     }
@@ -108,7 +112,9 @@ export function AssistantPage() {
               value={message}
               onChange={(event) => setMessage(event.target.value)}
             />
-            <Button onClick={handleSend}>Send</Button>
+            <Button onClick={handleSend} disabled={typing || !message.trim()}>
+              {typing ? 'Sending...' : 'Send'}
+            </Button>
           </div>
         </div>
       </Card>

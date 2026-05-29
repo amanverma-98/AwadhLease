@@ -22,6 +22,7 @@ export function PropertiesPage() {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     name: '',
     address: '',
@@ -68,6 +69,8 @@ export function PropertiesPage() {
       })
       return
     }
+    if (saving) return
+    setSaving(true)
     try {
       await createProperty(mapPropertyToCreatePayload(form))
       pushToast({ title: 'Property added', message: 'Listing saved to backend.' })
@@ -96,6 +99,8 @@ export function PropertiesPage() {
       loadProperties()
     } catch (error) {
       pushToast({ title: 'Save failed', message: error.message })
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -381,7 +386,9 @@ export function PropertiesPage() {
               <Button variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreate}>Save property</Button>
+              <Button onClick={handleCreate} disabled={saving}>
+                {saving ? 'Saving...' : 'Save property'}
+              </Button>
             </div>
           </Card>
         </div>

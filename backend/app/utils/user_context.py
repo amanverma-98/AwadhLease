@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 from app.models.landlord import Landlord
 from app.models.tenant import Tenant
 from app.models.user import User
+from app.utils.link import get_link_id
 
 
 async def get_landlord_for_user(user: User) -> Landlord | None:
@@ -37,6 +38,6 @@ async def resolve_profile_context(
         if tenant_doc:
             tenant_id = str(tenant_doc.id)
             if tenant_doc.property_id:
-                property_id = str(tenant_doc.property_id.id)
+                property_id = get_link_id(tenant_doc.property_id)
 
     return landlord_id, tenant_id, property_id, tenant_doc

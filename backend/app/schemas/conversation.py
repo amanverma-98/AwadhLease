@@ -5,6 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel, field_serializer
 
 from app.schemas.base import DocumentOut
+from app.utils.link import get_link_id
 
 
 class ConversationOut(DocumentOut):
@@ -14,7 +15,7 @@ class ConversationOut(DocumentOut):
 
     @field_serializer("user_id")
     def serialize_user_id(self, value):
-        return None if value is None else str(value)
+        return None if value is None else get_link_id(value)
 
 
 class MessageOut(DocumentOut):
@@ -25,4 +26,4 @@ class MessageOut(DocumentOut):
 
     @field_serializer("conversation_id")
     def serialize_conversation_id(self, value):
-        return "" if value is None else str(value)
+        return "" if value is None else (get_link_id(value) or "")

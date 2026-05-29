@@ -15,6 +15,8 @@ export function TenantsPage() {
   const [tenants, setTenants] = useState([])
   const [properties, setProperties] = useState([])
   const [credentials, setCredentials] = useState(null)
+  const [creating, setCreating] = useState(false)
+  const [broadcasting, setBroadcasting] = useState(false)
   const [alertForm, setAlertForm] = useState({
     title: '',
     message: '',
@@ -57,6 +59,8 @@ export function TenantsPage() {
   }, [])
 
   const handleCreate = async () => {
+    if (creating) return
+    setCreating(true)
     try {
       const result = await createTenant({
         property_id: form.propertyId,
@@ -81,6 +85,8 @@ export function TenantsPage() {
       load()
     } catch (error) {
       pushToast({ title: 'Create failed', message: error.message })
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -89,6 +95,8 @@ export function TenantsPage() {
       pushToast({ title: 'Missing fields', message: 'Add a title and message.' })
       return
     }
+    if (broadcasting) return
+    setBroadcasting(true)
     try {
       await broadcastNotification({
         title: alertForm.title,
@@ -99,6 +107,8 @@ export function TenantsPage() {
       setAlertForm({ title: '', message: '', propertyId: '' })
     } catch (error) {
       pushToast({ title: 'Send failed', message: error.message })
+    } finally {
+      setBroadcasting(false)
     }
   }
 
@@ -155,7 +165,9 @@ export function TenantsPage() {
           />
         </div>
         <div className="mt-4 flex justify-end">
-          <Button onClick={handleBroadcast}>Send alert</Button>
+          <Button onClick={handleBroadcast} disabled={broadcasting}>
+            {broadcasting ? 'Sending...' : 'Send alert'}
+          </Button>
         </div>
       </Card>
 
@@ -232,7 +244,9 @@ export function TenantsPage() {
               <Button variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreate}>Generate credentials</Button>
+              <Button onClick={handleCreate} disabled={creating}>
+                {creating ? 'Creating...' : 'Generate credentials'}
+              </Button>
             </div>
           </Card>
         </div>

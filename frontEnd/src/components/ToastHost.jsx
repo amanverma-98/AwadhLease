@@ -19,7 +19,12 @@ export function ToastHost() {
           key={toast.id}
           className="glass-panel rounded-2xl px-4 py-3 text-sm font-semibold text-ink-900 shadow-card"
         >
-          {toast.title}
+          <p>{toast.title}</p>
+          {toast.message && (
+            <p className="mt-1 text-xs font-normal text-ink-500">
+              {toast.message}
+            </p>
+          )}
         </div>
       ))}
     </div>

@@ -16,6 +16,7 @@ from app.schemas.property import (
     PropertyOut,
     PropertyUpdate,
 )
+from app.utils.link import get_link_id
 from app.services.notification_service import NotificationService
 from app.services.property_service import PropertyService
 
@@ -107,11 +108,17 @@ async def contact_landlord(property_id: str, payload: ContactLandlordRequest):
     if not doc or not doc.landlord_id:
         return ContactLandlordResponse(status="not_found")
 
-    landlord = await Landlord.get(doc.landlord_id.id)
+    landlord_id = get_link_id(doc.landlord_id)
+    if not landlord_id:
+        return ContactLandlordResponse(status="not_found")
+    landlord = await Landlord.get(PydanticObjectId(landlord_id))
     if not landlord or not landlord.user_id:
         return ContactLandlordResponse(status="not_found")
 
-    user = await User.get(landlord.user_id.id)
+    user_id = get_link_id(landlord.user_id)
+    if not user_id:
+        return ContactLandlordResponse(status="not_found")
+    user = await User.get(PydanticObjectId(user_id))
     if not user:
         return ContactLandlordResponse(status="not_found")
 

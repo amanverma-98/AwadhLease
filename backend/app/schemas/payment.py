@@ -5,6 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel, field_serializer
 
 from app.schemas.base import DocumentOut
+from app.utils.link import get_link_id
 
 
 class PaymentCreate(BaseModel):
@@ -33,4 +34,4 @@ class PaymentOut(DocumentOut):
 
     @field_serializer("tenant_id", "property_id")
     def serialize_ids(self, value):
-        return "" if value is None else str(value)
+        return "" if value is None else (get_link_id(value) or "")

@@ -13,6 +13,7 @@ from app.models.property import Property
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentOut, TenantPaymentCreate
+from app.utils.link import get_link_id
 from app.utils.user_context import get_tenant_for_user
 
 
@@ -77,7 +78,10 @@ class PaymentService:
         if not tenant_doc.property_id:
             raise HTTPException(status_code=404, detail="Tenant property not found")
 
-        property_doc = await Property.get(tenant_doc.property_id.id)
+        property_id = get_link_id(tenant_doc.property_id)
+        if not property_id:
+            raise HTTPException(status_code=404, detail="Tenant property not found")
+        property_doc = await Property.get(PydanticObjectId(property_id))
         if not property_doc:
             raise HTTPException(status_code=404, detail="Property not found")
 

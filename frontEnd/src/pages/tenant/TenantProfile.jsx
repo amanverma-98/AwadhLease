@@ -11,6 +11,7 @@ export function TenantProfile() {
   const { user, login } = useUserStore()
   const { pushToast } = useNotificationStore()
   const saved = loadTenantContext()
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     fullName: user?.name || '',
     phone: '',
@@ -20,6 +21,8 @@ export function TenantProfile() {
   })
 
   const handleSave = async () => {
+    if (saving) return
+    setSaving(true)
     try {
       const data = await updateMe({
         full_name: form.fullName,
@@ -34,6 +37,8 @@ export function TenantProfile() {
       pushToast({ title: 'Profile saved', message: 'Profile synced with backend.' })
     } catch (error) {
       pushToast({ title: 'Save failed', message: error.message })
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -69,8 +74,8 @@ export function TenantProfile() {
             onChange={(e) => setForm((p) => ({ ...p, propertyId: e.target.value }))}
           />
         </div>
-        <Button className="mt-6" onClick={handleSave}>
-          Save profile
+        <Button className="mt-6" onClick={handleSave} disabled={saving}>
+          {saving ? 'Saving...' : 'Save profile'}
         </Button>
       </Card>
     </div>

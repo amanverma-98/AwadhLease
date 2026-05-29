@@ -19,6 +19,8 @@ export function ListingDetails() {
   const [submitted, setSubmitted] = useState(false)
   const [contacted, setContacted] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [bookingLoading, setBookingLoading] = useState(false)
+  const [contactLoading, setContactLoading] = useState(false)
   const [property, setProperty] = useState(null)
   const [form, setForm] = useState({ name: '', phone: '', date: '', message: '' })
   const [activeImage, setActiveImage] = useState('')
@@ -64,6 +66,8 @@ export function ListingDetails() {
       pushToast({ title: 'Missing details', message: 'Fill name, phone, and visit date.' })
       return
     }
+    if (bookingLoading) return
+    setBookingLoading(true)
     try {
       await createBooking({
         property_id: id,
@@ -80,6 +84,8 @@ export function ListingDetails() {
       pushToast({ title: 'Visit booked', message: 'Landlord will confirm shortly.' })
     } catch (error) {
       pushToast({ title: 'Booking failed', message: error.message })
+    } finally {
+      setBookingLoading(false)
     }
   }
 
@@ -88,6 +94,8 @@ export function ListingDetails() {
       pushToast({ title: 'Missing details', message: 'Fill name and phone.' })
       return
     }
+    if (contactLoading) return
+    setContactLoading(true)
     try {
       await contactLandlord(id, {
         name: form.name,
@@ -98,6 +106,8 @@ export function ListingDetails() {
       pushToast({ title: 'Sent', message: 'Landlord notified of your request.' })
     } catch (error) {
       pushToast({ title: 'Send failed', message: error.message })
+    } finally {
+      setContactLoading(false)
     }
   }
 
@@ -229,8 +239,12 @@ export function ListingDetails() {
                   setForm((prev) => ({ ...prev, message: event.target.value }))
                 }
               />
-              <Button className="w-full" onClick={handleBooking}>
-                Book site visit
+              <Button
+                className="w-full"
+                onClick={handleBooking}
+                disabled={bookingLoading}
+              >
+                {bookingLoading ? 'Booking...' : 'Book site visit'}
               </Button>
               {submitted && (
                 <div className="rounded-2xl bg-emerald-500/10 p-4 text-sm text-emerald-700">
@@ -253,9 +267,10 @@ export function ListingDetails() {
               className="mt-4 w-full"
               variant="secondary"
               onClick={handleContact}
+              disabled={contactLoading}
             >
               <PhoneCall className="mr-2 h-4 w-4" />
-              Send details
+              {contactLoading ? 'Sending...' : 'Send details'}
             </Button>
             {contacted && (
               <p className="mt-3 text-xs text-ink-500">

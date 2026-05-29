@@ -6,6 +6,7 @@ from typing import List, Optional
 from pydantic import BaseModel, field_serializer
 
 from app.schemas.base import DocumentOut
+from app.utils.link import get_link_id
 
 
 class PropertyCreate(BaseModel):
@@ -84,7 +85,7 @@ class PropertyOut(DocumentOut):
 
     @field_serializer("landlord_id")
     def serialize_landlord_id(self, value):
-        return "" if value is None else str(value)
+        return "" if value is None else (get_link_id(value) or "")
 
 
 class ContactLandlordRequest(BaseModel):

@@ -10,21 +10,13 @@ from app.models.landlord import Landlord
 from app.models.property import Property
 from app.models.user import User
 from app.schemas.property import PropertyCreate, PropertyOut, PropertyUpdate
+from app.utils.link import get_link_id
 
 
 class PropertyService:
     @staticmethod
     def _extract_link_id(value: object) -> str | None:
-        if value is None:
-            return None
-        if isinstance(value, PydanticObjectId):
-            return str(value)
-        if isinstance(value, str):
-            return value
-        link_id = getattr(value, "id", None)
-        if link_id is None:
-            return None
-        return str(link_id)
+        return get_link_id(value)
 
     def _to_out(self, doc: Property) -> PropertyOut:
         return PropertyOut(

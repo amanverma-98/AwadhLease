@@ -10,6 +10,7 @@ from app.models.notification import Notification
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.notification import NotificationOut
+from app.utils.link import get_link_id
 from app.websocket.manager import manager
 
 
@@ -31,7 +32,8 @@ class NotificationService:
 
     async def mark_read(self, notification_id: str, user: User) -> NotificationOut:
         doc = await Notification.get(PydanticObjectId(notification_id))
-        if doc and str(doc.user_id.id) == str(user.id):
+        doc_user_id = get_link_id(doc.user_id) if doc else None
+        if doc and doc_user_id and str(doc_user_id) == str(user.id):
             doc.status = "read"
             await doc.save()
             return NotificationOut.model_validate(doc)
@@ -60,7 +62,10 @@ class NotificationService:
         for tenant in tenants:
             if not tenant.user_id:
                 continue
-            tenant_user = await User.get(tenant.user_id.id)
+            tenant_user_id = get_link_id(tenant.user_id)
+            if not tenant_user_id:
+                continue
+            tenant_user = await User.get(PydanticObjectId(tenant_user_id))
             if not tenant_user:
                 continue
             results.append(await self.notify(tenant_user, title, message))

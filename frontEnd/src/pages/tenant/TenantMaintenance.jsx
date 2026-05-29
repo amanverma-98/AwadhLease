@@ -14,6 +14,7 @@ export function TenantMaintenance() {
   const [issue, setIssue] = useState('')
   const [tickets, setTickets] = useState([])
   const [status, setStatus] = useState({ loading: true, error: null })
+  const [submitting, setSubmitting] = useState(false)
   const [context, setContext] = useState(loadTenantContext() || {
     tenantId: '',
     propertyId: ''
@@ -57,7 +58,8 @@ export function TenantMaintenance() {
   }
 
   const handleSubmit = async () => {
-    if (!issue.trim()) return
+    if (!issue.trim() || submitting) return
+    setSubmitting(true)
     try {
       const payload = { issue }
       if (context.tenantId) payload.tenant_id = context.tenantId
@@ -69,6 +71,8 @@ export function TenantMaintenance() {
       setTickets(data.map((t) => mapMaintenanceFromApi(t)))
     } catch (error) {
       pushToast({ title: 'Submit failed', message: error.message })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -110,8 +114,12 @@ export function TenantMaintenance() {
           value={issue}
           onChange={(e) => setIssue(e.target.value)}
         />
-        <Button className="mt-4" onClick={handleSubmit}>
-          Submit ticket
+        <Button
+          className="mt-4"
+          onClick={handleSubmit}
+          disabled={submitting || !issue.trim()}
+        >
+          {submitting ? 'Submitting...' : 'Submit ticket'}
         </Button>
       </Card>
 

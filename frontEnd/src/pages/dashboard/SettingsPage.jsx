@@ -4,9 +4,11 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { getMe, updateMe } from '../../services/authService'
 import { useUserStore } from '../../store/useUserStore'
+import { useNotificationStore } from '../../store/useNotificationStore'
 
 export function SettingsPage() {
   const { updateUserInfo } = useUserStore()
+  const { pushToast } = useNotificationStore()
   const [form, setForm] = useState({ full_name: '', email: '', phone: '' })
   const [status, setStatus] = useState({ loading: true, saving: false, error: null })
 
@@ -25,6 +27,7 @@ export function SettingsPage() {
       .catch((error) => {
         if (!isMounted) return
         setStatus({ loading: false, saving: false, error: error.message })
+        pushToast({ title: 'Load failed', message: error.message })
       })
     return () => {
       isMounted = false
@@ -46,8 +49,10 @@ export function SettingsPage() {
       const data = await updateMe(payload)
       updateUserInfo({ name: data.full_name, email: data.email, phone: data.phone })
       setStatus({ loading: false, saving: false, error: null })
+      pushToast({ title: 'Settings saved', message: 'Profile updated successfully.' })
     } catch (error) {
       setStatus({ loading: false, saving: false, error: error.message })
+      pushToast({ title: 'Save failed', message: error.message })
     }
   }
 

@@ -14,6 +14,7 @@ from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut
 from app.services.ai.factory import get_ai_client
+from app.utils.link import get_link_id
 from app.utils.user_context import get_tenant_for_user
 
 
@@ -68,7 +69,7 @@ class MaintenanceService:
                     detail="Tenant profile not linked to this account",
                 )
             tenant_id = str(tenant_doc.id)
-            property_id = str(tenant_doc.property_id.id) if tenant_doc.property_id else property_id
+            property_id = get_link_id(tenant_doc.property_id) or property_id
         elif not property_id or not tenant_id:
             raise HTTPException(
                 status_code=422,
@@ -83,7 +84,8 @@ class MaintenanceService:
             raise HTTPException(status_code=404, detail="Tenant not found")
 
         if user.role == "tenant" and tenant_doc.user_id:
-            if str(tenant_doc.user_id.id) != str(user.id):
+            tenant_user_id = get_link_id(tenant_doc.user_id)
+            if tenant_user_id and str(tenant_user_id) != str(user.id):
                 raise HTTPException(status_code=403, detail="Cannot create ticket for another tenant")
 
         classification = await self._agent.classify(payload.issue)
@@ -105,8 +107,8 @@ class MaintenanceService:
     def _to_out(doc: MaintenanceTicket) -> MaintenanceOut:
         return MaintenanceOut(
             id=str(doc.id),
-            property_id=str(doc.property_id.id) if doc.property_id else "",
-            tenant_id=str(doc.tenant_id.id) if doc.tenant_id else "",
+            property_id=get_link_id(doc.property_id) or "",
+            tenant_id=get_link_id(doc.tenant_id) or "",
             issue=doc.issue,
             issue_images=doc.issue_images,
             category=doc.category,

@@ -6,6 +6,7 @@ from typing import Any, Dict
 from pydantic import BaseModel, field_serializer
 
 from app.schemas.base import DocumentOut
+from app.utils.link import get_link_id
 
 
 class NotificationOut(DocumentOut):
@@ -20,7 +21,7 @@ class NotificationOut(DocumentOut):
 
     @field_serializer("user_id")
     def serialize_user_id(self, value):
-        return "" if value is None else str(value)
+        return "" if value is None else (get_link_id(value) or "")
 
 
 class NotificationBroadcastRequest(BaseModel):

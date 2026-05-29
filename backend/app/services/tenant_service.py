@@ -15,21 +15,13 @@ from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.tenant import TenantCreate, TenantCreateResponse, TenantOut, TenantUpdate
 from app.services.email_service import EmailService
+from app.utils.link import get_link_id
 
 
 class TenantService:
     @staticmethod
     def _extract_link_id(value: object) -> str | None:
-        if value is None:
-            return None
-        if isinstance(value, PydanticObjectId):
-            return str(value)
-        if isinstance(value, str):
-            return value
-        link_id = getattr(value, "id", None)
-        if link_id is None:
-            return None
-        return str(link_id)
+        return get_link_id(value)
 
     async def list_tenants(
         self,

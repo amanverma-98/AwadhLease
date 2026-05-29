@@ -17,6 +17,7 @@ import { SettingsPage } from '../pages/dashboard/SettingsPage'
 import { TenantDashboard } from '../pages/tenant/TenantDashboard'
 import { TenantPayments } from '../pages/tenant/TenantPayments'
 import { TenantPaymentGateway } from '../pages/tenant/TenantPaymentGateway'
+import { TenantPaymentSuccess } from '../pages/tenant/TenantPaymentSuccess'
 import { TenantMaintenance } from '../pages/tenant/TenantMaintenance'
 import { TenantLease } from '../pages/tenant/TenantLease'
 import { TenantProfile } from '../pages/tenant/TenantProfile'
@@ -82,6 +83,7 @@ export function AppRoutes() {
         <Route path="/tenant/dashboard" element={<TenantDashboard />} />
         <Route path="/tenant/payments" element={<TenantPayments />} />
         <Route path="/tenant/payments/checkout" element={<TenantPaymentGateway />} />
+        <Route path="/tenant/payments/success" element={<TenantPaymentSuccess />} />
         <Route path="/tenant/maintenance" element={<TenantMaintenance />} />
         <Route path="/tenant/lease" element={<TenantLease />} />
         <Route path="/tenant/profile" element={<TenantProfile />} />

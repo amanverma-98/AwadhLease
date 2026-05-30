@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from app.auth.dependencies import get_current_user
 from app.middleware.rate_limit import rate_limit_dependency
 from app.models.user import User
-from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut
+from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut, MaintenanceUpdate
 from app.services.maintenance_service import MaintenanceService
 
 router = APIRouter(
@@ -34,3 +34,12 @@ async def create_maintenance(
     user: User = Depends(get_current_user),
 ):
     return await service.create_ticket(payload, user)
+
+
+@router.patch("/{ticket_id}", response_model=MaintenanceOut)
+async def update_maintenance(
+    ticket_id: str,
+    payload: MaintenanceUpdate,
+    user: User = Depends(get_current_user),
+):
+    return await service.update_ticket(ticket_id, payload, user)

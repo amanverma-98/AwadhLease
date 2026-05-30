@@ -12,7 +12,7 @@ from app.models.maintenance import MaintenanceTicket
 from app.models.property import Property
 from app.models.tenant import Tenant
 from app.models.user import User
-from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut
+from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut, MaintenanceUpdate
 from app.services.ai.factory import get_ai_client
 from app.utils.link import get_link_id
 from app.utils.user_context import get_tenant_for_user
@@ -60,6 +60,7 @@ class MaintenanceService:
     async def create_ticket(self, payload: MaintenanceCreate, user: User) -> MaintenanceOut:
         property_id = payload.property_id
         tenant_id = payload.tenant_id
+        landlord: Landlord | None = None
 
         if user.role == "tenant":
             tenant_doc = await get_tenant_for_user(user)
@@ -70,6 +71,10 @@ class MaintenanceService:
                 )
             tenant_id = str(tenant_doc.id)
             property_id = get_link_id(tenant_doc.property_id) or property_id
+        elif user.role == "landlord":
+            landlord = await Landlord.find(Landlord.user_id.id == user.id).first_or_none()
+            if not landlord:
+                raise HTTPException(status_code=404, detail="Landlord profile not found")
         elif not property_id or not tenant_id:
             raise HTTPException(
                 status_code=422,
@@ -82,6 +87,20 @@ class MaintenanceService:
         tenant_doc = await Tenant.get(PydanticObjectId(tenant_id))
         if not tenant_doc:
             raise HTTPException(status_code=404, detail="Tenant not found")
+
+        if user.role == "landlord":
+            property_landlord_id = get_link_id(property_doc.landlord_id)
+            if property_landlord_id and str(property_landlord_id) != str(landlord.id):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Cannot create ticket for another landlord",
+                )
+            tenant_landlord_id = get_link_id(tenant_doc.landlord_id)
+            if tenant_landlord_id and str(tenant_landlord_id) != str(landlord.id):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Cannot create ticket for another landlord",
+                )
 
         if user.role == "tenant" and tenant_doc.user_id:
             tenant_user_id = get_link_id(tenant_doc.user_id)
@@ -101,6 +120,58 @@ class MaintenanceService:
             summary=classification.summary,
         )
         await doc.insert()
+        return self._to_out(doc)
+
+    async def update_ticket(
+        self,
+        ticket_id: str,
+        payload: MaintenanceUpdate,
+        user: User,
+    ) -> MaintenanceOut:
+        if user.role != "landlord":
+            raise HTTPException(status_code=403, detail="Only landlords can update tickets")
+
+        doc = await MaintenanceTicket.get(PydanticObjectId(ticket_id))
+        if not doc:
+            raise HTTPException(status_code=404, detail="Maintenance ticket not found")
+
+        landlord = await Landlord.find(Landlord.user_id.id == user.id).first_or_none()
+        if not landlord:
+            raise HTTPException(status_code=404, detail="Landlord profile not found")
+
+        property_id = get_link_id(doc.property_id)
+        property_doc = None
+        if property_id:
+            property_doc = await Property.get(PydanticObjectId(property_id))
+
+        tenant_id = get_link_id(doc.tenant_id)
+        if not tenant_id:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+        tenant_doc = await Tenant.get(PydanticObjectId(tenant_id))
+        if not tenant_doc:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+
+        property_landlord_id = get_link_id(property_doc.landlord_id) if property_doc else None
+        tenant_landlord_id = get_link_id(tenant_doc.landlord_id)
+        is_authorized = False
+        if property_landlord_id:
+            is_authorized = str(property_landlord_id) == str(landlord.id)
+        elif tenant_landlord_id:
+            is_authorized = str(tenant_landlord_id) == str(landlord.id)
+
+        if not is_authorized:
+            raise HTTPException(status_code=403, detail="Cannot update ticket for another landlord")
+
+        update_data = payload.model_dump(exclude_unset=True)
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No updates provided")
+
+        if "status" in update_data and update_data["status"]:
+            doc.status = update_data["status"]
+        if "assigned_vendor" in update_data:
+            doc.assigned_vendor = update_data["assigned_vendor"]
+
+        await doc.save()
         return self._to_out(doc)
 
     @staticmethod

@@ -217,6 +217,11 @@ export interface MaintenanceOut {
   created_at: string
 }
 
+export interface MaintenanceUpdate {
+  status?: string | null
+  assigned_vendor?: string | null
+}
+
 export interface ChatRequest {
   message: string
   conversation_id?: string | null

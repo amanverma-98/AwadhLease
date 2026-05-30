@@ -6,7 +6,7 @@ from app.schemas.booking import BookingCreate, BookingOut
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.conversation import ConversationOut, MessageOut
 from app.schemas.landlord import LandlordOut
-from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut
+from app.schemas.maintenance import MaintenanceCreate, MaintenanceOut, MaintenanceUpdate
 from app.schemas.notification import NotificationOut
 from app.schemas.payment import PaymentCreate, PaymentOut
 from app.schemas.property import PropertyCreate, PropertyOut, PropertyUpdate
@@ -39,6 +39,7 @@ __all__ = [
     "LandlordOut",
     "MaintenanceCreate",
     "MaintenanceOut",
+    "MaintenanceUpdate",
     "NotificationOut",
     "PaymentCreate",
     "PaymentOut",

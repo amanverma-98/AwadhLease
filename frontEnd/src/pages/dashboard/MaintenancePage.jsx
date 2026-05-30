@@ -3,7 +3,7 @@ import { MaintenanceCard } from '../../components/MaintenanceCard'
 import { Card } from '../../components/ui/card'
 import { PageHeader } from '../../components/PageHeader'
 import { EmptyState } from '../../components/EmptyState'
-import { listMaintenance } from '../../services/maintenanceService'
+import { listMaintenance, updateMaintenance } from '../../services/maintenanceService'
 import { listProperties } from '../../services/propertyService'
 import { mapMaintenanceFromApi } from '../../utils/maintenanceMapper'
 import { useNotificationStore } from '../../store/useNotificationStore'
@@ -57,14 +57,24 @@ export function MaintenancePage() {
   })
 
   // Handle mock ticket status transition for demo interaction
-  const handleResolveTicket = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'Resolved' } : t))
-    pushToast({ title: 'Ticket Resolved', message: 'Assigned tenant has been notified.' })
+  const handleResolveTicket = async (id) => {
+    try {
+      await updateMaintenance(id, { status: 'Resolved' })
+      await load()
+      pushToast({ title: 'Ticket Resolved', message: 'Assigned tenant has been notified.' })
+    } catch (error) {
+      pushToast({ title: 'Resolve failed', message: error.message, tone: 'danger' })
+    }
   }
 
-  const handleAssignContractor = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'In Progress', vendor: 'A1 Plumbing Lucknow' } : t))
-    pushToast({ title: 'Contractor Assigned', message: 'Vendor dispatched successfully.' })
+  const handleAssignContractor = async (id) => {
+    try {
+      await updateMaintenance(id, { status: 'In Progress', assigned_vendor: 'A1 Plumbing Lucknow' })
+      await load()
+      pushToast({ title: 'Contractor Assigned', message: 'Vendor dispatched successfully.' })
+    } catch (error) {
+      pushToast({ title: 'Assign failed', message: error.message, tone: 'danger' })
+    }
   }
 
   return (

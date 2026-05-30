@@ -8,19 +8,24 @@ export const useUserStore = create((set, get) => ({
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  hasHydrated: false,
   isLoading: false,
   authError: null,
 
   hydrate: () => {
     const saved = loadAuth()
-    if (!saved?.accessToken) return
-    set({
-      user: saved.user || null,
-      role: saved.role || null,
-      accessToken: saved.accessToken,
-      refreshToken: saved.refreshToken,
-      isAuthenticated: true
-    })
+    if (saved?.accessToken) {
+      set({
+        user: saved.user || null,
+        role: saved.role || null,
+        accessToken: saved.accessToken,
+        refreshToken: saved.refreshToken,
+        isAuthenticated: true,
+        hasHydrated: true
+      })
+      return
+    }
+    set({ hasHydrated: true })
   },
 
   refreshProfile: async () => {

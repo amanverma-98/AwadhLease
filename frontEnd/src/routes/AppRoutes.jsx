@@ -29,7 +29,10 @@ import { NotFound } from '../pages/NotFound'
 import { useUserStore } from '../store/useUserStore'
 
 function AuthGuard({ children }) {
-  const { isAuthenticated } = useUserStore()
+  const { isAuthenticated, hasHydrated } = useUserStore()
+  if (!hasHydrated) {
+    return null
+  }
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />
   }

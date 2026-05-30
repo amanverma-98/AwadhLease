@@ -17,3 +17,13 @@ export async function createMaintenance(payload) {
   const { data } = await apiClient.post('/maintenance', payload)
   return data
 }
+
+/**
+ * @param {string} ticketId
+ * @param {import('../api/types').MaintenanceUpdate} payload
+ * @returns {Promise<import('../api/types').MaintenanceOut>}
+ */
+export async function updateMaintenance(ticketId, payload) {
+  const { data } = await apiClient.patch(`/maintenance/${ticketId}`, payload)
+  return data
+}

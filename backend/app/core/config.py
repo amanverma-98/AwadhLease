@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     mail_ssl_tls: bool = Field(False, alias="MAIL_SSL_TLS")
     mail_validate_certs: bool = Field(True, alias="MAIL_VALIDATE_CERTS")
     tenant_portal_url: str | None = Field(None, alias="TENANT_PORTAL_URL")
+    portal_url: str | None = Field(None, alias="PORTAL_URL")
+    password_reset_minutes: int = Field(30, alias="PASSWORD_RESET_MINUTES")
 
     model_config = SettingsConfigDict(
         env_file=str(_ENV_FILE),

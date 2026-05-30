@@ -5,6 +5,7 @@ import secrets
 from typing import List
 
 from beanie import PydanticObjectId
+from bson.errors import InvalidId
 from fastapi import HTTPException
 
 from app.models.landlord import Landlord
@@ -18,17 +19,39 @@ from app.utils.user_context import get_tenant_for_user
 
 
 class PaymentService:
-    async def list_for_user(self, user: User, skip: int, limit: int) -> List[PaymentOut]:
+    async def list_for_user(
+        self,
+        user: User,
+        skip: int,
+        limit: int,
+        tenant_id: str | None,
+        property_id: str | None,
+        status: str | None,
+        date_from: datetime | None,
+        date_to: datetime | None,
+    ) -> List[PaymentOut]:
         if user.role == "tenant":
             tenant_doc = await get_tenant_for_user(user)
             if not tenant_doc:
                 return []
-            items = (
-                await Payment.find(Payment.tenant_id.id == tenant_doc.id)
-                .skip(skip)
-                .limit(limit)
-                .to_list()
-            )
+            filters = {"tenant_id.$id": tenant_doc.id}
+
+            if property_id:
+                try:
+                    filters["property_id.$id"] = PydanticObjectId(property_id)
+                except InvalidId as exc:
+                    raise HTTPException(status_code=400, detail="Invalid property ID") from exc
+            if status:
+                filters["payment_status"] = status
+            if date_from or date_to:
+                range_filter = {}
+                if date_from:
+                    range_filter["$gte"] = date_from
+                if date_to:
+                    range_filter["$lte"] = date_to
+                filters["payment_date"] = range_filter
+
+            items = await Payment.find(filters).skip(skip).limit(limit).to_list()
             return [PaymentOut.model_validate(item) for item in items]
 
         if user.role == "landlord":
@@ -39,12 +62,42 @@ class PaymentService:
             tenant_ids = [t.id for t in tenant_docs]
             if not tenant_ids:
                 return []
-            items = (
-                await Payment.find({"tenant_id.$id": {"$in": tenant_ids}})
-                .skip(skip)
-                .limit(limit)
-                .to_list()
-            )
+            if tenant_id:
+                try:
+                    tenant_object_id = PydanticObjectId(tenant_id)
+                except InvalidId as exc:
+                    raise HTTPException(status_code=400, detail="Invalid tenant ID") from exc
+                if tenant_object_id not in tenant_ids:
+                    return []
+                tenant_ids = [tenant_object_id]
+
+            filters = {"tenant_id.$id": {"$in": tenant_ids}}
+
+            if property_id:
+                try:
+                    property_object_id = PydanticObjectId(property_id)
+                except InvalidId as exc:
+                    raise HTTPException(status_code=400, detail="Invalid property ID") from exc
+
+                property_doc = await Property.find(
+                    Property.landlord_id.id == landlord.id,
+                    Property.id == property_object_id,
+                ).first_or_none()
+                if not property_doc:
+                    return []
+                filters["property_id.$id"] = property_object_id
+
+            if status:
+                filters["payment_status"] = status
+            if date_from or date_to:
+                range_filter = {}
+                if date_from:
+                    range_filter["$gte"] = date_from
+                if date_to:
+                    range_filter["$lte"] = date_to
+                filters["payment_date"] = range_filter
+
+            items = await Payment.find(filters).skip(skip).limit(limit).to_list()
             return [PaymentOut.model_validate(item) for item in items]
 
         return []

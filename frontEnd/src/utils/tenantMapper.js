@@ -23,6 +23,7 @@ export function mapTenantFromApi(tenant, propertyName = '') {
     phone: tenant.phone,
     email: tenant.email,
     propertyId: tenant.property_id,
+    status: tenant.status,
     _raw: tenant
   }
 }

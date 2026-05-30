@@ -13,11 +13,13 @@ from app.models.analytics_snapshot import AnalyticsSnapshot
 from app.models.amenity import Amenity
 from app.models.landlord import Landlord
 from app.models.lease import Lease
+from app.models.lease_document import LeaseDocument
 from app.models.maintenance import MaintenanceTicket
 from app.models.maintenance_update import MaintenanceUpdate
 from app.models.notification import Notification
 from app.models.occupancy_prediction import OccupancyPrediction
 from app.models.payment import Payment
+from app.models.password_reset_token import PasswordResetToken
 from app.models.property import Property
 from app.models.property_booking import PropertyBooking
 from app.models.property_image import PropertyImage
@@ -50,6 +52,7 @@ async def init_db(settings: Settings) -> None:
             PropertyImage,
             Amenity,
             Lease,
+            LeaseDocument,
             Payment,
             MaintenanceTicket,
             MaintenanceUpdate,
@@ -63,6 +66,7 @@ async def init_db(settings: Settings) -> None:
             TenantRiskScore,
             OccupancyPrediction,
             AnalyticsSnapshot,
+            PasswordResetToken,
         ],
     )
 

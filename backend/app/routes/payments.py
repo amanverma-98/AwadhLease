@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 
 from app.auth.dependencies import get_current_user, require_role
@@ -20,9 +22,23 @@ service = PaymentService()
 async def list_payments(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
+    tenant_id: str | None = None,
+    property_id: str | None = None,
+    status: str | None = None,
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
     user: User = Depends(get_current_user),
 ):
-    return await service.list_for_user(user, skip, limit)
+    return await service.list_for_user(
+        user,
+        skip,
+        limit,
+        tenant_id,
+        property_id,
+        status,
+        date_from,
+        date_to,
+    )
 
 
 @router.post("", response_model=PaymentOut, dependencies=[Depends(require_role("landlord"))])

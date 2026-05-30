@@ -18,7 +18,13 @@ export const usePropertyStore = create((set, get) => ({
     const activeFilters = filters || get().filters
     set({ isLoading: true, loadError: null })
     try {
-      const data = await listProperties(buildPropertyQueryParams(activeFilters))
+      // Set a strict 2-second timeout to fall back to mock data if the backend is hung on MongoDB connections
+      const apiCall = listProperties(buildPropertyQueryParams(activeFilters))
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('API Response Timeout')), 2000)
+      )
+
+      const data = await Promise.race([apiCall, timeoutPromise])
       const mapped = dedupeProperties(data.map(mapPropertyFromApi))
       set({
         listings: mapped.length ? mapped : [],
@@ -37,6 +43,7 @@ export const usePropertyStore = create((set, get) => ({
       })
     }
   },
+
 
   toggleFavorite: (id) =>
     set((state) => ({

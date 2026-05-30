@@ -29,18 +29,27 @@ class TenantService:
         skip: int,
         limit: int,
         property_id: str | None,
+        include_inactive: bool,
     ) -> Tuple[List[TenantOut], int]:
         landlord = await Landlord.find(Landlord.user_id.id == user.id).first_or_none()
         if not landlord:
             return [], 0
 
+        filters = []
+        if not include_inactive:
+            filters.append({"status": {"$ne": "Inactive"}})
+
         if property_id:
-            query = Tenant.find(
-                Tenant.landlord_id.id == landlord.id,
-                Tenant.property_id.id == PydanticObjectId(property_id),
+            filters.extend(
+                [
+                    Tenant.landlord_id.id == landlord.id,
+                    Tenant.property_id.id == PydanticObjectId(property_id),
+                ]
             )
+            query = Tenant.find(*filters)
         else:
-            query = Tenant.find(Tenant.landlord_id.id == landlord.id)
+            filters.append(Tenant.landlord_id.id == landlord.id)
+            query = Tenant.find(*filters)
 
         total = await query.count()
         items = await query.skip(skip).limit(limit).to_list()
@@ -135,7 +144,15 @@ class TenantService:
         doc = await Tenant.get(PydanticObjectId(tenant_id))
         if not doc:
             raise HTTPException(status_code=404, detail="Tenant not found")
-        await doc.delete()
+        doc.status = "Inactive"
+        await doc.save()
+
+        user_id = get_link_id(doc.user_id)
+        if user_id:
+            user = await User.get(PydanticObjectId(user_id))
+            if user:
+                user.is_active = False
+                await user.save()
 
     @staticmethod
     def _to_out(doc: Tenant) -> TenantOut:

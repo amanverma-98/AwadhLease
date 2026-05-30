@@ -73,3 +73,25 @@ class EmailService:
 		except Exception:  # noqa: BLE001
 			self.logger.exception("Failed to send tenant welcome email to %s", tenant_email)
 			return False
+
+	async def send_password_reset(self, user_email: str, reset_url: str) -> bool:
+		if not self._mail:
+			self.logger.warning("Email is not configured; skipping password reset email.")
+			return False
+
+		message = MessageSchema(
+			subject="Reset your Awadhlease password",
+			recipients=[user_email],
+			template_body={
+				"user_email": user_email,
+				"reset_url": reset_url,
+			},
+			subtype=MessageType.html,
+		)
+
+		try:
+			await self._mail.send_message(message, template_name="reset_password.html")
+			return True
+		except Exception:  # noqa: BLE001
+			self.logger.exception("Failed to send password reset email to %s", user_email)
+			return False

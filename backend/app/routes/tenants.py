@@ -21,9 +21,10 @@ async def list_tenants(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     property_id: str | None = None,
+    include_inactive: bool = Query(False),
     user: User = Depends(get_current_user),
 ):
-    items, _ = await service.list_tenants(user, skip, limit, property_id)
+    items, _ = await service.list_tenants(user, skip, limit, property_id, include_inactive)
     return items
 
 

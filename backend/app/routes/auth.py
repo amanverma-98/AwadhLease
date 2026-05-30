@@ -10,6 +10,8 @@ from app.schemas.auth import (
     LoginRequest,
     RefreshRequest,
     RegisterLandlordRequest,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     TokenResponse,
     UserMeResponse,
 )
@@ -38,6 +40,11 @@ async def refresh(payload: RefreshRequest):
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 async def forgot_password(payload: ForgotPasswordRequest):
     return await service.request_password_reset(payload.email)
+
+
+@router.post("/reset-password", response_model=ResetPasswordResponse)
+async def reset_password(payload: ResetPasswordRequest):
+    return await service.reset_password(payload.token, payload.password)
 
 
 @router.get("/me", response_model=UserMeResponse)

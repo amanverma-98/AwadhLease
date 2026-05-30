@@ -29,6 +29,15 @@ class ForgotPasswordResponse(BaseModel):
     status: str
 
 
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+
+class ResetPasswordResponse(BaseModel):
+    status: str
+
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
